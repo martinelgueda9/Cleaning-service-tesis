@@ -1,6 +1,6 @@
 # Marcela's Cleaning Mn - Sistema de Gestión 
 
-Sistema web desarrollado como **Proyecto de Título** de la carrera de *Ingeniería en Ejecución en Computación e Informática* (Universidad del Bío-Bío), diseñado específicamente para la microempresa de servicios de limpieza a domicilio **MarcelasCleaningMn** (Saint Cloud, Minnesota, EE. UU.).
+Sistema web en desarrollo como **Proyecto de Título** de la carrera de *Ingeniería en Ejecución en Computación e Informática* (Universidad del Bío-Bío), diseñado específicamente para la microempresa de servicios de limpieza a domicilio **MarcelasCleaningMn** (Saint Cloud, Minnesota, EE. UU.).
 
 Este sistema busca digitalizar y centralizar los procesos clave del negocio, los cuales actualmente se gestionan de forma manual a través de WhatsApp, llamadas telefónicas y registros en papel.
 
