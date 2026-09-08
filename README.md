@@ -36,7 +36,6 @@ El proyecto es un monorepositorio que separa la lógica del cliente (Frontend) y
 
 ## Estructura del Proyecto
 
-```text
 web-tesis/
 │
 ├── frontend/          
@@ -85,8 +84,3 @@ npm run dev
 ```
 La aplicación cliente estará disponible típicamente en `http://localhost:5173`.
 
----
-
-##  Autor
-
-*   **Universidad del Bío-Bío** - *Proyecto de Título - Ingeniería en Ejecución en Computación e Informática*
