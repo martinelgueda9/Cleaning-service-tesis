@@ -2,7 +2,7 @@
   "name": "marcelas-cleaning-backend",
   "version": "1.0.0",
   "description": "Backend API para gestion de agenda, cotizaciones y ventas - MarcelasCleaningMn",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
