@@ -30,24 +30,40 @@ El proyecto es un monorepositorio que separa la lógica del cliente (Frontend) y
 *   **Framework:** Express.js
 *   **Lenguaje:** TypeScript
 *   **ORM:** Prisma
-*   **Validación de Datos:** Zod
 
 ---
 
 ## Estructura del Proyecto
 
+```bash
 web-tesis/
+├── backend/
+│   └── src/
+│       ├── config/
+│       ├── controllers/
+│       ├── data/
+│       ├── middlewares/
+│       ├── routes/
+│       ├── schemas/
+│       ├── services/
+│       ├── types/
+│       └── utils/
 │
-├── frontend/          
-│   ├── src/           
-│   ├── package.json
-│   └── tsconfig.json
-│
-└── backend/           
-    ├── src/           
-    ├── prisma/       
-    ├── package.json
-    └── tsconfig.json
+└── frontend/
+    └── src/
+        ├── assets/
+        ├── components/
+        │   ├── about/
+        │   ├── common/
+        │   ├── contact/
+        │   ├── cotizacion/
+        │   ├── layout/
+        │   └── services/
+        ├── context/
+        ├── data/
+        ├── pages/
+        ├── styles/
+        └── utils/
 ```
 
 ### 1. Clonar el repositorio

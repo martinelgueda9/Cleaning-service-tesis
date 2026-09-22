@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoLimpieza {
+  ESTANDAR
+  PROFUNDA
+  MUDANZA_ENTRADA
+  MUDANZA_SALIDA
+  POST_CONSTRUCCION
+  OFICINA
+}
+
+model Cliente {
+  id            String       @id @default(uuid())
+  nombre        String
+  apellido      String?
+  email         String?
+  telefono      String
+  direccion     String
+  ciudad        String       @default("Saint Cloud")
+  estadoRegion  String       @default("MN")
+  codigoPostal  String?
+  notas         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  cotizaciones  Cotizacion[]
+  citas         Cita[]
+
+  @@map("clientes")
+}
+
+model Cotizacion {
+  id                    String            @id @default(uuid())
+  codigo                String            @unique
+  clienteId             String
+  cliente               Cliente           @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  
+  tipoLimpieza          TipoLimpieza      @default(ESTANDAR)
+  piesCuadrados         Float?
+  metrosCuadrados       Float?
+  numHabitaciones       Int               @default(1)
+  numBanos              Int               @default(1)
+  tieneMascotas         Boolean           @default(false)
+  serviciosExtra        String?
+  totalEstimado         Float
+  fechaExpira           DateTime?
+  notas                 String?
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  citas                 Cita[]
+
+  @@map("cotizaciones")
+}
+
+model Cita {
+  id                 String       @id @default(uuid())
+  codigo             String       @unique
+  clienteId          String
+  cliente            Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  cotizacionId       String?
+  cotizacion         Cotizacion?  @relation(fields: [cotizacionId], references: [id])
+
+  fechaServicio      DateTime
+  horaInicio         String
+  horaFin            String
+  personalAsignado   String?
+  direccionServicio  String
+  notas              String?
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@map("citas")
+}

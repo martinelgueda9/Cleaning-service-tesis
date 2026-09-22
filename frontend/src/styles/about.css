@@ -1,0 +1,90 @@
+
+.about-home-section {
+  padding: 4rem 0;
+  margin-top: 1.5rem;
+  scroll-margin-top: 100px;
+}
+
+.about-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+
+.about-text-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.about-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 1.2rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.about-description {
+  font-size: 1.05rem;
+  color: var(--gray-600);
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+}
+
+
+.about-image-column {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.about-photo-wrapper {
+  width: 100%;
+  max-width: 480px;
+}
+
+.about-photo-card {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(15, 27, 61, 0.08);
+  border: 1px solid var(--gray-200);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-photo-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+
+@media (max-width: 900px) {
+  .about-home-section {
+    padding: 2.5rem 0;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .about-title {
+    font-size: 1.75rem;
+  }
+}
