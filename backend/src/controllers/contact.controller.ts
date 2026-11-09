@@ -5,7 +5,7 @@ import { sendContactEmailNotification } from '../services/mail.service.js';
 
 export async function submitContact(req: Request, res: Response): Promise<void> {
   try {
-    
+
     const { name, email, phone, message } = req.body;
 
     const cleanPhone = phone || 'Sin teléfono';
