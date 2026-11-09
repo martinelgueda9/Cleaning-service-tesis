@@ -3,7 +3,9 @@ export type ServiceKey = 'standard' | 'deep' | 'movein' | 'moveout';
 export interface SizeOption {
   id: string;
   label: string;
-  basePrice: number | null; 
+  basePrice: number | null;
+  estimatedTime?: string;
+  shortLabel?: string;
 }
 
 export interface AddOn {
@@ -18,37 +20,37 @@ export const PRICING: Record<ServiceKey, { sizeLabel: string; options: SizeOptio
   standard: {
     sizeLabel: 'Bedrooms and bathrooms',
     options: [
-      { id: '1bed_1bath', label: '1 bedroom / 1 bath', basePrice: 135 },
-      { id: '2bed_1bath', label: '2 bedrooms / 1 bath', basePrice: 150 },
-      { id: '2bed_1_5bath', label: '2 bedrooms / 1.5 baths', basePrice: 165 },
-      { id: '2bed_2bath', label: '2 bedrooms / 2 baths', basePrice: 180 },
-      { id: '3bed_2bath', label: '3 bedrooms / 2 baths', basePrice: 210 },
-      { id: '4bed_2_3bath', label: '4 bedrooms / 2–3 baths', basePrice: 250 },
-      { id: 'something_else', label: 'Something else', basePrice: null },
+      { id: '1bed_1bath', label: '1 bedroom / 1 bath', shortLabel: '1 bed · 1 bath', basePrice: 135, estimatedTime: '~2 hrs' },
+      { id: '2bed_1bath', label: '2 bedrooms / 1 bath', shortLabel: '2 bed · 1 bath', basePrice: 150, estimatedTime: '~2.5 hrs' },
+      { id: '2bed_1_5bath', label: '2 bedrooms / 1.5 baths', shortLabel: '2 bed · 1.5 bath', basePrice: 165, estimatedTime: '~3 hrs' },
+      { id: '2bed_2bath', label: '2 bedrooms / 2 baths', shortLabel: '2 bed · 2 bath', basePrice: 180, estimatedTime: '~3.5 hrs' },
+      { id: '3bed_2bath', label: '3 bedrooms / 2 baths', shortLabel: '3 bed · 2 bath', basePrice: 210, estimatedTime: '~4 hrs' },
+      { id: '4bed_2_3bath', label: '4 bedrooms / 2–3 baths', shortLabel: '4 bed · 2–3 bath', basePrice: 250, estimatedTime: '~5 hrs' },
+      { id: 'something_else', label: 'Something else', shortLabel: 'Custom Layout', basePrice: null, estimatedTime: 'Flexible' },
     ],
   },
   deep: {
     sizeLabel: 'Home size',
     options: [
-      { id: 'small_apt', label: 'Small apartment', basePrice: 250 },
-      { id: 'medium_home', label: 'Medium home', basePrice: 325 },
-      { id: 'large_home', label: 'Large home', basePrice: 425 },
+      { id: 'small_apt', label: 'Small apartment', shortLabel: 'Small Apt (1–2 bed)', basePrice: 250, estimatedTime: '~3.5 hrs' },
+      { id: 'medium_home', label: 'Medium home', shortLabel: 'Medium Home (3 bed)', basePrice: 325, estimatedTime: '~5 hrs' },
+      { id: 'large_home', label: 'Large home', shortLabel: 'Large Home (4+ bed)', basePrice: 425, estimatedTime: '~6.5+ hrs' },
     ],
   },
   movein: {
     sizeLabel: 'Property size',
     options: [
-      { id: '1_2bed_apt', label: '1–2 bedroom apartment', basePrice: 275 },
-      { id: '3bed_home', label: '3 bedroom home', basePrice: 350 },
-      { id: 'larger_home', label: 'Larger home', basePrice: null },
+      { id: '1_2bed_apt', label: '1–2 bedroom apartment', shortLabel: '1–2 Bed Apartment', basePrice: 275, estimatedTime: '~4 hrs' },
+      { id: '3bed_home', label: '3 bedroom home', shortLabel: '3 Bed Family Home', basePrice: 350, estimatedTime: '~5.5 hrs' },
+      { id: 'larger_home', label: 'Larger home', shortLabel: 'Large / Estate Home', basePrice: null, estimatedTime: 'Custom' },
     ],
   },
   moveout: {
     sizeLabel: 'Property size',
     options: [
-      { id: '1_2bed_apt', label: '1–2 bedroom apartment', basePrice: 275 },
-      { id: '3bed_home', label: '3 bedroom home', basePrice: 350 },
-      { id: 'larger_home', label: 'Larger home', basePrice: null },
+      { id: '1_2bed_apt', label: '1–2 bedroom apartment', shortLabel: '1–2 Bed Apartment', basePrice: 275, estimatedTime: '~4 hrs' },
+      { id: '3bed_home', label: '3 bedroom home', shortLabel: '3 Bed Family Home', basePrice: 350, estimatedTime: '~5.5 hrs' },
+      { id: 'larger_home', label: 'Larger home', shortLabel: 'Large / Estate Home', basePrice: null, estimatedTime: 'Custom' },
     ],
   },
 };

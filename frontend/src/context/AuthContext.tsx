@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (!response.ok) {
-        
+
         clearSession();
         return;
       }
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sessionStorage.setItem('marcelas_user', JSON.stringify(userData));
       }
     } catch {
-      
+
       console.warn('No se pudo verificar el token con el servidor');
     }
   }
