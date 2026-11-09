@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, Phone } from 'lucide-react';
 import logoMNavy from '../../assets/logo_m_navy.jpg';
 
 export const Header: React.FC = () => {
@@ -8,14 +9,18 @@ export const Header: React.FC = () => {
 
   const navItems = ['Home', 'Services', 'About us', 'Contact'];
 
-  const [activeSection, setActiveSection] = React.useState<'Home' | 'Services' | 'About us' | 'Contact'>('Home');
+  const [activeSection, setActiveSection] = useState<'Home' | 'Services' | 'About us' | 'Contact'>('Home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  React.useEffect(() => {
-    if (location.pathname !== '/') {
-      return;
-    }
-
+  useEffect(() => {
     const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+
+      if (location.pathname !== '/') {
+        return;
+      }
+
       const servicesEl = document.getElementById('services');
       const aboutEl = document.getElementById('about');
       const contactEl = document.getElementById('contact');
@@ -48,7 +53,12 @@ export const Header: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
   }, [location.pathname]);
 
   const getActiveTab = () => {
@@ -62,6 +72,7 @@ export const Header: React.FC = () => {
   const activeTab = getActiveTab();
 
   const handleNavClick = (item: string) => {
+    setMobileMenuOpen(false);
     if (item === 'Home') {
       if (location.pathname === '/') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -110,8 +121,9 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="app-header">
+    <header className={`app-header ${isScrolled ? 'app-header--scrolled' : ''}`}>
       <div className="header-container">
+
         <div className="header-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <img src={logoMNavy} alt="Marcela's M Emblem" className="header-logo-m-standalone" />
           <div className="brand-text">
@@ -120,20 +132,25 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        <nav className="header-nav-center">
-          {navItems.map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={`nav-btn ${activeTab === item ? 'active' : ''}`}
-              onClick={() => handleNavClick(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </nav>
+        <div className="header-right-group">
+          <nav className="header-nav-inline">
+            {navItems.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`nav-btn ${activeTab === item ? 'active' : ''}`}
+                onClick={() => handleNavClick(item)}
+              >
+                <span>{item}</span>
+              </button>
+            ))}
+          </nav>
 
-        <div className="header-contact">
+          <a href="tel:+13202493106" className="header-phone-link" aria-label="Call +1 (320) 249-3106">
+            <Phone size={16} className="phone-icon" />
+            <span className="phone-number">+1 (320) 249-3106</span>
+          </a>
+
           <button
             type="button"
             className="btn-quote-header"
@@ -141,15 +158,66 @@ export const Header: React.FC = () => {
           >
             Get a Free Quote
           </button>
+        </div>
 
-          <div className="header-phone-text">
-            <svg className="phone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-            <span className="phone-number">+1 (320) 249-3106</span>
-          </div>
+        <div className="header-mobile-actions">
+          <a href="tel:+13202493106" className="header-mobile-phone-btn" aria-label="Call directly">
+            <Phone size={18} />
+          </a>
+
+          <button
+            type="button"
+            className="btn-quote-header btn-quote-header--mobile"
+            onClick={() => navigate('/quote')}
+          >
+            Quote
+          </button>
+
+          <button
+            type="button"
+            className="header-burger-btn"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+          </button>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="header-mobile-drawer">
+          <nav className="header-mobile-nav">
+            {navItems.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`mobile-nav-btn ${activeTab === item ? 'active' : ''}`}
+                onClick={() => handleNavClick(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+
+          <div className="header-mobile-drawer-footer">
+            <a href="tel:+13202493106" className="header-drawer-phone">
+              <Phone size={18} />
+              <span>+1 (320) 249-3106</span>
+            </a>
+            <button
+              type="button"
+              className="btn-quote-header full-width"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate('/quote');
+              }}
+            >
+              Get a Free Quote
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
