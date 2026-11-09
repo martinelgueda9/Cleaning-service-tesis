@@ -1,5 +1,4 @@
 
-
 html {
   scroll-behavior: auto;
   scroll-padding-top: 110px;
@@ -44,7 +43,6 @@ html {
   background: var(--gray-50);
 }
 
-
 .contact-header {
   text-align: center;
   max-width: 720px;
@@ -82,14 +80,12 @@ html {
   line-height: 1.6;
 }
 
-
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1.35fr;
   gap: 2.2rem;
   align-items: stretch;
 }
-
 
 .contact-info-card {
   background: linear-gradient(165deg, var(--navy-dark) 0%, var(--navy) 65%, var(--navy-light) 100%);
@@ -224,7 +220,6 @@ a.contact-method-item:hover .method-value {
   color: var(--white);
   display: block;
 }
-
 
 .contact-form-card {
   background: var(--white);
@@ -416,99 +411,182 @@ a.contact-method-item:hover .method-value {
   }
 }
 
+.contact-form-card.is-success-active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
 .contact-success-state {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 2rem 1rem;
-  animation: fadeInContact 0.4s ease-out;
+  padding: 2.5rem 1.5rem;
+  margin: auto 0;
+  width: 100%;
+  animation: fadeInContact 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  outline: none;
 }
 
-.success-badge-large {
-  width: 76px;
-  height: 76px;
-  background: linear-gradient(135deg, var(--teal) 0%, #1e9492 100%);
-  color: var(--white);
-  border-radius: 50%;
+.success-animated-circle {
+  width: 68px;
+  height: 68px;
+  margin-bottom: 1.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(43, 181, 178, 0.35);
-  margin-bottom: 1.5rem;
 }
 
-.contact-success-state h2 {
+.success-checkmark {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3.5;
+  stroke: var(--teal);
+  stroke-miterlimit: 10;
+  box-shadow: 0 6px 18px rgba(43, 181, 178, 0.25);
+  animation: scaleCheckmark 0.3s ease-in-out both;
+}
+
+.success-checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3.5;
+  stroke-miterlimit: 10;
+  stroke: var(--teal);
+  fill: rgba(43, 181, 178, 0.08);
+  animation: strokeCircle 0.45s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.success-checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke-width: 3.8;
+  stroke: var(--teal-dark);
+  animation: strokeCheck 0.32s cubic-bezier(0.65, 0, 0.45, 1) 0.35s forwards;
+}
+
+@keyframes strokeCircle {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes strokeCheck {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scaleCheckmark {
+  0%, 100% {
+    transform: none;
+  }
+  50% {
+    transform: scale3d(1.08, 1.08, 1);
+  }
+}
+
+.success-logo-circle {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 2px solid var(--teal);
+  box-shadow: 0 4px 16px rgba(43, 181, 178, 0.25);
+  background: var(--white);
+  padding: 4px;
+  margin-bottom: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.success-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.success-title {
   font-size: 1.85rem;
   font-weight: 700;
   color: var(--navy);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.25;
 }
 
-.success-summary-desc {
-  font-size: 1rem;
+.success-response-timeline {
+  font-size: 1.02rem;
   color: var(--gray-600);
-  max-width: 480px;
+  max-width: 500px;
   line-height: 1.6;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1rem;
 }
 
-.success-details-box {
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: 12px;
-  padding: 1.2rem 1.6rem;
-  width: 100%;
-  max-width: 480px;
-  margin-bottom: 2rem;
-  text-align: left;
+.success-response-timeline strong {
+  color: var(--navy);
 }
 
-.success-details-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid var(--gray-200);
-  font-size: 0.92rem;
+.success-channel-badge {
+  display: inline-block;
+  background: rgba(27, 42, 90, 0.07);
+  color: var(--navy);
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  word-break: break-all;
 }
 
-.success-details-row:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
+.success-urgent-hint {
+  font-size: 0.95rem;
   color: var(--gray-600);
-}
-
-.detail-value {
-  font-weight: 600;
-  color: var(--navy);
-}
-
-.success-actions-wrap {
+  margin-bottom: 1.8rem;
+  max-width: 520px;
+  width: 100%;
+  line-height: 1.6;
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  overflow-wrap: break-word;
 }
 
-.btn-secondary-outline {
-  background: transparent;
+.success-urgent-phone {
+  color: var(--teal-dark);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--teal);
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.success-urgent-phone:hover {
   color: var(--navy);
-  border: 1.5px solid var(--navy);
-  padding: 0.8rem 1.6rem;
-  font-size: 0.96rem;
-  font-weight: 600;
-  border-radius: 8px;
+}
+
+.btn-send-another {
+  background: transparent !important;
+  color: var(--navy) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  padding: 0.75rem 1.6rem !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
   cursor: pointer;
+  transition: all 0.2s ease !important;
 }
 
-.btn-secondary-outline:hover {
-  background: var(--navy);
-  color: var(--white);
+.btn-send-another:hover {
+  border-color: var(--navy) !important;
+  background: rgba(27, 42, 90, 0.04) !important;
+  color: var(--navy) !important;
 }
-
 
 .home-contact-section {
   margin-top: 3.5rem;
@@ -543,7 +621,6 @@ a.contact-method-item:hover .method-value {
   gap: 1rem;
   flex-shrink: 0;
 }
-
 
 @media (max-width: 960px) {
   .contact-grid {

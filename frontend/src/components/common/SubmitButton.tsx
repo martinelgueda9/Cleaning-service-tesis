@@ -2,15 +2,15 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface SubmitButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  
+
   loading?: boolean;
-  
+
   loadingText?: string;
-  
+
   icon?: LucideIcon;
-  
+
   label?: string;
-  
+
   variant?: 'primary' | 'secondary';
 }
 

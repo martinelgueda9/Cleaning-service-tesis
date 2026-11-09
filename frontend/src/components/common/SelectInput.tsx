@@ -1,9 +1,9 @@
 import React from 'react';
 
 interface SelectInputProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  
+
   hasError?: boolean;
-  
+
   children: React.ReactNode;
 }
 

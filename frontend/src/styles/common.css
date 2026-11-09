@@ -1,6 +1,4 @@
 
-
-
 .form-field {
   display: flex;
   flex-direction: column;
@@ -47,7 +45,6 @@
   margin-top: 2px;
 }
 
-
 .form-control {
   width: 100%;
   padding: 0.6rem 0.85rem;
@@ -91,7 +88,6 @@
   cursor: pointer;
 }
 
-
 .input-with-icon {
   position: relative;
   display: flex;
@@ -121,7 +117,6 @@
 .input-with-icon.textarea-wrap .input-icon {
   top: 0.7rem;
 }
-
 
 .submit-btn {
   display: inline-flex;
@@ -175,7 +170,6 @@
     transform: rotate(360deg);
   }
 }
-
 
 .form-row {
   display: grid;

@@ -14,22 +14,7 @@
 .services-header {
   text-align: center;
   max-width: 720px;
-  margin: 0 auto 2rem auto;
-}
-
-.services-section-tag {
-  display: inline-block;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--teal);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  background: rgba(43, 181, 178, 0.1);
-  padding: 0.35rem 0.9rem;
-  border-radius: 20px;
-  margin-bottom: 0.8rem;
-  border: 1px solid rgba(43, 181, 178, 0.25);
+  margin: 0 auto 2.5rem auto;
 }
 
 .services-title {
@@ -47,53 +32,12 @@
   line-height: 1.6;
 }
 
-
-.services-pills-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-}
-
-.services-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 24px;
-  background: #ffffff;
-  border: 1px solid var(--gray-200);
-  color: var(--navy);
-  font-size: 0.9rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(15, 27, 61, 0.04);
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.services-pill-btn:hover {
-  border-color: rgba(43, 181, 178, 0.6);
-  background: rgba(43, 181, 178, 0.05);
-}
-
-.services-pill-btn.active {
-  background: var(--navy);
-  color: var(--white);
-  border-color: var(--navy);
-  box-shadow: 0 4px 14px rgba(27, 42, 90, 0.25);
-}
-
-
 .services-carousel-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
-
 
 .carousel-arrow-btn {
   width: 48px;
@@ -125,251 +69,274 @@
   box-shadow: none;
 }
 
-
 .services-cards-carousel {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-behavior: auto;
+  scroll-behavior: smooth;
   gap: 1.5rem;
   padding: 0.5rem 0.25rem 1.5rem 0.25rem;
   width: 100%;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  align-items: flex-start;
 }
 
 .services-cards-carousel::-webkit-scrollbar {
   display: none;
 }
 
-
-.service-detail-card {
+.svc-card {
   flex: 0 0 calc(33.333% - 1rem);
   min-width: 320px;
   scroll-snap-align: start;
   background: #ffffff;
   border-radius: 16px;
-  padding: 1.8rem;
   border: 1px solid var(--gray-200);
-  box-shadow: 0 4px 20px rgba(15, 27, 61, 0.05);
+  box-shadow: 0 4px 16px rgba(15, 27, 61, 0.05);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: none !important;
+  position: relative;
+  overflow: hidden;
+  outline: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.service-detail-card:hover,
-.service-detail-card:focus,
-.service-detail-card:active {
-  transform: none !important;
-  box-shadow: 0 4px 20px rgba(15, 27, 61, 0.05) !important;
-  border-color: var(--gray-200) !important;
+.svc-card:hover,
+.svc-card:focus-within {
+  box-shadow: 0 8px 24px rgba(15, 27, 61, 0.1);
+  border-color: var(--teal);
 }
 
-.service-card-top-header {
+.svc-card-img-placeholder {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #eef2f6 0%, #e2e8f0 100%);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.svc-card-img-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.svc-card-body {
+  padding: 1.25rem 1.4rem 1.4rem;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.2rem;
-}
-
-.service-icon-badge {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
-  color: var(--teal-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(27, 42, 90, 0.2);
-}
-
-.service-tag {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--navy);
-  background: rgba(27, 42, 90, 0.08);
-  padding: 0.35rem 0.75rem;
-  border-radius: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.service-starting-price {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--teal-dark);
-  background: rgba(43, 181, 178, 0.12);
-  padding: 0.3rem 0.75rem;
-  border-radius: 8px;
-  letter-spacing: -0.01em;
-}
-
-.service-card-title {
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: var(--navy);
-  margin-bottom: 0.3rem;
-  line-height: 1.25;
-}
-
-.service-card-tagline {
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--teal-dark);
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.service-card-description {
-  font-size: 0.92rem;
-  color: var(--gray-600);
-  line-height: 1.55;
-  margin-bottom: 1.3rem;
-}
-
-.service-checklist {
-  background: var(--gray-50);
-  border-radius: 12px;
-  padding: 1.1rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  flex-direction: column;
   flex: 1;
 }
 
-.checklist-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--navy);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.7rem;
+.svc-card-icon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
-.service-checklist ul {
+.svc-card-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--navy);
+  background: rgba(27, 42, 90, 0.07);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+}
+
+.svc-card-price {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--teal-dark);
+  background: rgba(43, 181, 178, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.svc-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.2rem;
+  line-height: 1.25;
+}
+
+.svc-card-tagline {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--teal-dark);
+  margin-bottom: 0.55rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.svc-card-desc {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.svc-card-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  color: var(--navy);
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.45rem 0;
+  margin-top: auto;
+  transition: color 0.15s ease;
+  align-self: flex-start;
+}
+
+.svc-card-expand-btn:hover {
+  color: var(--teal-dark);
+}
+
+.svc-card-overlay-panel {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1.35rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1.5px var(--teal);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+
+  transition: opacity 0.22s ease 0s, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) 0s;
+  overflow-y: auto;
+}
+
+.svc-card-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.svc-overlay-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.svc-overlay-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0 0.3rem;
+  display: none;
+  border-radius: 4px;
+}
+
+.svc-overlay-close-btn:hover {
+  color: var(--navy);
+}
+
+.svc-overlay-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+  flex: 1;
 }
 
-.service-checklist li {
+.svc-overlay-list li {
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
-  font-size: 0.88rem;
-  color: var(--gray-600);
+  font-size: 0.86rem;
+  color: var(--gray-700);
+  line-height: 1.45;
+}
+
+.svc-check {
+  color: var(--teal);
+  font-weight: 700;
+  flex-shrink: 0;
   line-height: 1.4;
 }
 
-.service-checklist .check-icon,
-.service-checklist .checklist-dash {
-  color: var(--teal);
-  flex-shrink: 0;
-  margin-top: 0px;
-  font-weight: 700;
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.service-not-included {
+.svc-not-included {
   margin-top: 0.85rem;
-  padding-top: 0.75rem;
+  padding-top: 0.65rem;
   border-top: 1px dashed #CBD5E1;
   font-size: 0.78rem;
   color: #64748b;
   line-height: 1.4;
 }
 
-.service-not-included strong {
+.svc-not-included strong {
   color: var(--navy);
 }
 
-.service-card-action {
-  margin-top: auto;
+@media (hover: hover) {
+  .svc-card:hover .svc-card-overlay-panel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+
+    transition-delay: 150ms, 150ms;
+  }
 }
 
-.btn-service-quote {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 0.8rem 1.4rem;
-  background: transparent;
-  color: var(--navy);
-  border: 1.5px solid var(--navy);
-  font-weight: 600;
-  font-size: 0.95rem;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.svc-card:focus-within .svc-card-overlay-panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: 150ms, 150ms;
 }
 
-.btn-service-quote:hover {
-  background: var(--navy);
-  color: var(--white);
-}
+@media (hover: none) {
+  .svc-overlay-close-btn {
+    display: inline-block;
+  }
 
-.services-free-estimates-banner {
-  margin-top: 2.5rem;
-  background: linear-gradient(135deg, rgba(27, 42, 90, 0.04) 0%, rgba(43, 181, 178, 0.08) 100%);
-  border: 1.5px dashed rgba(43, 181, 178, 0.4);
-  border-radius: 14px;
-  padding: 1.4rem 1.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  .svc-card.is-touch-open .svc-card-overlay-panel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition-delay: 0s, 0s;
+  }
 }
-
-.services-free-estimates-banner .banner-text h4 {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--navy);
-  margin-bottom: 0.25rem;
-}
-
-.services-free-estimates-banner .banner-text p {
-  font-size: 0.9rem;
-  color: var(--gray-600);
-  margin: 0;
-  line-height: 1.45;
-}
-
-.btn-banner-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--navy);
-  color: var(--white);
-  border: none;
-  padding: 0.75rem 1.4rem;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.92rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.btn-banner-action:hover {
-  background: var(--navy-dark);
-  transform: translateY(-1px);
-}
-
 
 .services-pagination-dots {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .services-pagination-dots .dot {
@@ -389,9 +356,8 @@
   background: var(--teal);
 }
 
-
 @media (max-width: 1024px) {
-  .service-detail-card {
+  .svc-card {
     flex: 0 0 calc(50% - 0.75rem);
   }
 }
@@ -403,7 +369,7 @@
   }
 
   .services-header {
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.5rem;
   }
 
   .services-title {
@@ -414,49 +380,26 @@
     font-size: 0.92rem;
   }
 
-  .services-pills-bar {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scrollbar-width: none;
-  }
-
-  .services-pills-bar::-webkit-scrollbar {
+  .carousel-arrow-btn {
     display: none;
   }
 
-  .services-pill-btn {
-    font-size: 0.82rem;
-    padding: 0.45rem 0.85rem;
-    flex-shrink: 0;
-  }
-
-  .carousel-arrow-btn {
-    display: none; 
-  }
-
-  .services-cards-carousel {
-    gap: 1rem;
-  }
-
-  .service-detail-card {
+  .svc-card {
     flex: 0 0 86vw;
     min-width: unset;
-    max-width: 320px;
+    max-width: 330px;
     scroll-snap-align: center;
-    padding: 1.25rem;
-    border-radius: 14px;
   }
 
-  .service-card-title {
-    font-size: 1.25rem;
+  .svc-card-img-placeholder {
+    height: 150px;
   }
 
-  .service-card-description {
-    font-size: 0.86rem;
+  .svc-card-body {
+    padding: 1rem 1.1rem 1.2rem;
   }
 
-  .service-checklist {
-    padding: 0.85rem;
+  .svc-card-title {
+    font-size: 1.15rem;
   }
 }

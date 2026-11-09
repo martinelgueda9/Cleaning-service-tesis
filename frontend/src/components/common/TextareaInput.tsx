@@ -2,9 +2,9 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface TextareaInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  
+
   icon?: LucideIcon;
-  
+
   hasError?: boolean;
 }
 
