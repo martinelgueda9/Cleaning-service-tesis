@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Rol {
+  PROPIETARIA
+  CLIENTE
+}
+
 enum TipoLimpieza {
   ESTANDAR
   PROFUNDA
@@ -14,6 +19,81 @@ enum TipoLimpieza {
   MUDANZA_SALIDA
   POST_CONSTRUCCION
   OFICINA
+}
+
+enum EstadoCotizacion {
+  PENDIENTE
+  ACEPTADA
+  RECHAZADA
+}
+
+enum EstadoCita {
+  PROGRAMADA
+  EN_PROGRESO
+  COMPLETADA
+  CANCELADA
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nombre    String
+  email     String   @unique
+  password  String
+  rol       Rol      @default(CLIENTE)
+  activo    Boolean  @default(true)
+  clienteId String?  @unique
+  cliente   Cliente? @relation(fields: [clienteId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cotizacionesRevisadas Cotizacion[] @relation("RevisadoPor")
+
+  @@map("usuarios")
+}
+
+model ServicioTipo {
+  id              String          @id @default(uuid())
+  clave           String          @unique
+  nombre          String
+  etiquetaTamanio String
+  activo          Boolean         @default(true)
+  orden           Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  opciones        OpcionTamanio[]
+
+  @@map("servicio_tipos")
+}
+
+model OpcionTamanio {
+  id             String       @id @default(uuid())
+  servicioTipoId String
+  servicioTipo   ServicioTipo @relation(fields: [servicioTipoId], references: [id], onDelete: Cascade)
+  clave          String
+  etiqueta       String
+  precioBase     Float?
+  orden          Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([servicioTipoId, clave])
+  @@map("opcion_tamanios")
+}
+
+model AddonServicio {
+  id        String   @id @default(uuid())
+  clave     String   @unique
+  etiqueta  String
+  precioMin Float
+  precioMax Float
+  unidad    String
+  activo    Boolean  @default(true)
+  orden     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("addon_servicios")
 }
 
 model Cliente {
@@ -30,6 +110,7 @@ model Cliente {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
+  usuario       Usuario?
   cotizaciones  Cotizacion[]
   citas         Cita[]
 
@@ -41,7 +122,7 @@ model Cotizacion {
   codigo                String            @unique
   clienteId             String
   cliente               Cliente           @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  
+
   tipoLimpieza          TipoLimpieza      @default(ESTANDAR)
   piesCuadrados         Float?
   metrosCuadrados       Float?
@@ -52,6 +133,12 @@ model Cotizacion {
   totalEstimado         Float
   fechaExpira           DateTime?
   notas                 String?
+
+  estado                EstadoCotizacion  @default(PENDIENTE)
+  motivoRechazo         String?
+  fechaRevision         DateTime?
+  revisadoPorId         String?
+  revisadoPor           Usuario?          @relation("RevisadoPor", fields: [revisadoPorId], references: [id])
 
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
@@ -75,6 +162,8 @@ model Cita {
   personalAsignado   String?
   direccionServicio  String
   notas              String?
+
+  estadoCita         EstadoCita   @default(PROGRAMADA)
 
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
