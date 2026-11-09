@@ -1,9 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '../../styles/services.css';
 
 export interface ServiceDetail {
@@ -28,15 +24,12 @@ export const SERVICES_DATA: ServiceDetail[] = [
     tagline: 'Routine maintenance for homes in normal condition',
     description: 'Regular upkeep for living spaces, kitchens, bathrooms, and bedrooms to maintain cleanliness and hygiene.',
     items: [
-      'Dust furniture, shelves, and accessible surfaces',
-      'Remove accessible cobwebs and clean mirrors',
-      'Vacuum carpets, rugs, and mop hard floors',
-      'Clean & disinfect kitchen counters, sink, faucet & stovetop',
-      'Clean microwave exterior & visible cabinet fronts',
-      'Clean & disinfect toilet, shower, tub, counters & faucets',
-      'Empty trash cans & make beds when clean linens are ready',
+      'Dust accessible surfaces, furniture & wipe mirrors',
+      'Vacuum carpets, rugs & mop all hard floors',
+      'Clean & sanitize kitchen counters, sink & stovetop',
+      'Disinfect bathrooms: toilet, shower, tub & vanity',
     ],
-    notIncluded: 'Heavy buildup, organizing, dishes, laundry, appliance or cabinet interiors.',
+    notIncluded: 'Heavy buildup, inside appliances or cabinets.',
   },
   {
     id: 'deep_cleaning',
@@ -47,16 +40,13 @@ export const SERVICES_DATA: ServiceDetail[] = [
     tagline: 'More time, more detail, and a deeper clean',
     description: 'Comprehensive restorative cleaning tackling accumulated dust, baseboards, corners, and hard-to-reach spaces.',
     items: [
-      'Includes everything in standard cleaning service, plus detailed tasks',
-      'Detailed cleaning of baseboards, doors, frames & handles',
-      'Remove dust buildup in corners, ceiling fans & light fixtures',
-      'Clean blinds according to material and condition',
-      'Clean interior window sills, tracks & frames',
-      'Detailed cleaning of cabinet fronts & touchpoints',
-      'Scrub showers, tubs, toilets & remove soap scum / mineral buildup',
-      'Clean under & behind movable small furniture; detail microwave inside',
+      'Everything in Standard Cleaning included',
+      'Detailed hand-wiping of baseboards, doors & doorframes',
+      'Thorough dusting of ceiling fans, vents & blinds',
+      'Deep scrub of bathroom tiles, grout & soap scum removal',
+      'Interior window sills, tracks & switch plates detailed',
     ],
-    notIncluded: 'Inside fridge, oven, or cabinets; full interior windows; organizing; full wall washing.',
+    notIncluded: 'Inside fridge/oven (available as add-on), wall washing.',
   },
   {
     id: 'move_in_cleaning',
@@ -67,16 +57,12 @@ export const SERVICES_DATA: ServiceDetail[] = [
     tagline: 'For empty or nearly empty properties before or after moving',
     description: 'Top-to-bottom turnover clean designed to leave empty properties pristine for landlords, buyers, or inspections.',
     items: [
-      'Complete cleaning of all rooms, common areas & accessible surfaces',
-      'Clean baseboards, doors, frames, handles, switches & outlets',
-      'Clean inside and outside of empty cabinets, shelves & closets',
-      'Clean countertops, sink, faucet, stovetop & appliance exteriors',
-      'Deep clean bathrooms, showers, tubs & toilets',
-      'Vacuum carpets; vacuum and mop hard floors',
-      'Clean interior window sills, frames & tracks',
-      'Remove small debris left after the move',
+      'Wipe inside & outside of empty cabinets, drawers & closets',
+      'Deep clean & sanitize all bathrooms and kitchen surfaces',
+      'Detailed cleaning of baseboards, doors, frames & trim',
+      'Vacuum all carpeting; thoroughly vacuum & mop hard floors',
     ],
-    notIncluded: 'Home should be empty of personal belongings. Inside oven, fridge & windows are add-ons.',
+    notIncluded: 'Property should be empty of personal belongings.',
   },
   {
     id: 'addons',
@@ -87,14 +73,11 @@ export const SERVICES_DATA: ServiceDetail[] = [
     tagline: 'Combine with any service for targeted deep care',
     description: 'Customize your cleaning with specific targeted tasks for appliance interiors, windows, or organization.',
     items: [
-      'Inside refrigerator: $40 – $60',
-      'Inside oven: $40 – $60',
-      'Inside cabinets: From $40',
-      'Interior windows: $8 – $12 each',
-      'Light organizing: $35/hour (counters, bathroom, pantry, small closet)',
-      'Heavy pet hair removal: $25 – $50',
+      'Inside refrigerator & oven deep cleaning',
+      'Interior window cleaning (panes, tracks & frames)',
+      'Inside kitchen/bathroom cabinets & pantry',
+      'Pet hair removal & light room organization',
     ],
-    notIncluded: 'Published prices are starting prices for homes in normal condition.',
   },
   {
     id: 'commercial_cleaning',
@@ -105,20 +88,22 @@ export const SERVICES_DATA: ServiceDetail[] = [
     tagline: 'Offices & Professional Workspaces',
     description: 'Direct corporate consultation and customized walkthrough for offices, business facilities, and commercial workspaces.',
     items: [
-      'Desk, conference room & workstation sanitization',
-      'High-traffic flooring & carpet vacuuming',
-      'Restroom deep sanitization & hygiene supply refill',
-      'Breakroom counters, sink & appliance exterior wiping',
-      'Flexible schedules: daily, weekly, or after-hours',
+      'Workstations, desks & common area disinfection',
+      'Commercial restroom sanitation & restock support',
+      'High-traffic floor care, sweeping & carpet vacuuming',
+      'Breakroom counters, appliance exteriors & trash disposal',
     ],
-    notIncluded: 'Serving Saint Cloud, MN and surrounding communities.',
   },
 ];
 
 export const ServicesSection: React.FC = () => {
-  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
 
   const scrollToCard = (index: number) => {
     setActiveIndex(index);
@@ -146,7 +131,7 @@ export const ServicesSection: React.FC = () => {
     const scrollLeft = container.scrollLeft;
     const firstChild = container.children[0] as HTMLElement;
     if (!firstChild) return;
-    const cardWidth = firstChild.clientWidth || 340;
+    const cardWidth = firstChild.clientWidth || 320;
     const newIndex = Math.round(scrollLeft / (cardWidth + 24));
     if (newIndex >= 0 && newIndex < SERVICES_DATA.length && newIndex !== activeIndex) {
       setActiveIndex(newIndex);
@@ -180,25 +165,69 @@ export const ServicesSection: React.FC = () => {
             onScroll={handleScroll}
           >
             {SERVICES_DATA.map((service, index) => {
+              const isExpanded = expandedId === service.id;
               return (
                 <div
                   key={service.id}
-                  className={`service-detail-card ${activeIndex === index ? 'card-active' : ''}`}
+                  tabIndex={0}
+                  className={`svc-card ${activeIndex === index ? 'card-active' : ''} ${isExpanded ? 'is-touch-open' : ''}`}
                 >
-                  <h3 className="service-card-title">{service.title}</h3>
-                  <p className="service-card-tagline">{service.tagline}</p>
-                  <p className="service-card-description">{service.description}</p>
 
-                  <div className="service-checklist">
-                    <h4 className="checklist-title">What's Included:</h4>
-                    <ul>
+                  <div className="svc-card-img-placeholder" />
+
+                  <div className="svc-card-body">
+                    <div className="svc-card-icon-row">
+                      <span className="svc-card-badge">{service.badge}</span>
+                      <span className="svc-card-price">{service.startingPrice}</span>
+                    </div>
+                    <h3 className="svc-card-title">{service.title}</h3>
+                    <p className="svc-card-tagline">{service.tagline}</p>
+                    <p className="svc-card-desc">{service.description}</p>
+
+                    <button
+                      type="button"
+                      className="svc-card-expand-btn"
+                      onClick={() => toggleExpand(service.id)}
+                      aria-expanded={isExpanded}
+                    >
+                      {isExpanded ? (
+                        <>Hide details <ChevronUp size={16} /></>
+                      ) : (
+                        <>See what's included <ChevronDown size={16} /></>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="svc-card-overlay-panel" aria-hidden={!isExpanded}>
+                    <div className="svc-card-overlay-header">
+                      <h4 className="svc-overlay-title">What's included</h4>
+                      <button
+                        type="button"
+                        className="svc-overlay-close-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpand(service.id);
+                        }}
+                        aria-label="Close details"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <ul className="svc-overlay-list">
                       {service.items.map((item, i) => (
                         <li key={i}>
-                          <span className="checklist-dash">-</span>
+                          <span className="svc-check">–</span>
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
+
+                    {service.notIncluded && (
+                      <p className="svc-not-included">
+                        <strong>Not included:</strong> {service.notIncluded}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
