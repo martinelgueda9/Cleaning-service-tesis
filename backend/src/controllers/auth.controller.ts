@@ -1,32 +1,36 @@
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env.js';
+import { Response } from 'express';
+import { AuthRequest } from '../middlewares/auth.middleware.js';
+import * as authService from '../services/auth.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
-export function login(req: Request, res: Response) {
-  
-  const { email, password } = req.body;
-
-  if (email !== env.adminEmail || password !== env.adminPass) {
-    sendError(res, 'Credenciales incorrectas', 401);
-    return;
+export async function login(req: AuthRequest, res: Response) {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.login(email, password);
+    sendSuccess(res, result);
+  } catch (err) {
+    sendError(res, (err as Error).message, 401);
   }
-
-  const token = jwt.sign({ email: env.adminEmail }, env.jwtSecret, { expiresIn: '8h' });
-  sendSuccess(res, { token, user: { email: env.adminEmail } });
 }
 
-export function me(req: Request, res: Response) {
-  const header = req.headers.authorization;
-  if (!header || !header.startsWith('Bearer ')) {
-    sendError(res, 'No autenticado', 401);
-    return;
-  }
-
+export async function register(req: AuthRequest, res: Response) {
   try {
-    const decoded = jwt.verify(header.split(' ')[1], env.jwtSecret) as { email: string };
-    sendSuccess(res, { email: decoded.email });
-  } catch {
-    sendError(res, 'Token inválido', 401);
+    const result = await authService.register(req.body);
+    sendSuccess(res, result, 201);
+  } catch (err) {
+    sendError(res, (err as Error).message, 400);
+  }
+}
+
+export async function me(req: AuthRequest, res: Response) {
+  try {
+    if (!req.userId) {
+      sendError(res, 'No autenticado', 401);
+      return;
+    }
+    const user = await authService.getMe(req.userId);
+    sendSuccess(res, user);
+  } catch (err) {
+    sendError(res, (err as Error).message, 401);
   }
 }
