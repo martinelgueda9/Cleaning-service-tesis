@@ -243,7 +243,13 @@ function formatCurrency(n: number | null | undefined) {
 }
 
 function estadoLabel(e: string) {
-  return { PENDIENTE: 'Pending', ACEPTADA: 'Accepted', RECHAZADA: 'Declined' }[e] ?? e;
+  const norm = (e || '').toUpperCase();
+  return { PENDIENTE: 'Pending', PENDING: 'Pending', ACEPTADA: 'Accepted', ACCEPTED: 'Accepted', RECHAZADA: 'Declined', DECLINED: 'Declined' }[norm] ?? e;
+}
+
+function isEstadoPendiente(e?: string | null): boolean {
+  const norm = (e || '').toUpperCase();
+  return norm === 'PENDIENTE' || norm === 'PENDING';
 }
 
 function citaEstadoLabel(e: string) {
@@ -323,9 +329,9 @@ const SolicitudesPanel: React.FC<{
 
       if (onPendingCountChange) {
         if (!filterEstado) {
-          const pendCount = list.filter((c) => c.estado === 'PENDIENTE').length;
+          const pendCount = list.filter((c) => isEstadoPendiente(c.estado)).length;
           onPendingCountChange(pendCount);
-        } else if (filterEstado === 'PENDIENTE') {
+        } else if (isEstadoPendiente(filterEstado)) {
           onPendingCountChange(list.length);
         }
       }
@@ -628,7 +634,7 @@ const SolicitudesPanel: React.FC<{
                         >
                           View
                         </button>
-                        {c.estado === 'PENDIENTE' && (
+                        {isEstadoPendiente(c.estado) && (
                           <>
                             <button
                               className="adm-action-btn adm-action-btn--accept"
@@ -757,7 +763,7 @@ const SolicitudesPanel: React.FC<{
                   >
                     View Details
                   </button>
-                  {c.estado === 'PENDIENTE' && (
+                  {isEstadoPendiente(c.estado) && (
                     <>
                       <button
                         className="adm-action-btn adm-action-btn--accept full-btn"
@@ -898,7 +904,7 @@ const SolicitudesPanel: React.FC<{
                 </div>
 
                 <div className="adm-modal-footer">
-                  {selected.estado === 'PENDIENTE' && (
+                  {isEstadoPendiente(selected.estado) && (
                     <>
                       <button
                         className="adm-modal-btn adm-modal-btn--accept"
