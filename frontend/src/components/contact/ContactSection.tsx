@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   User,
   Mail,
   Phone,
   MessageSquare,
   Send,
-  CheckCircle2,
   MapPin,
   Clock,
 } from 'lucide-react';
+import logoMNavy from '../../assets/logo_m_navy.jpg';
 import { FormField, TextInput, TextareaInput, SubmitButton } from '../common';
 
 interface ContactFormData {
@@ -38,6 +38,16 @@ export const ContactSection: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState<ContactFormData | null>(null);
+  const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const successStateRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSubmitted && successStateRef.current) {
+      successStateRef.current.focus();
+    }
+  }, [isSubmitted]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -93,6 +103,10 @@ export const ContactSection: React.FC = () => {
       return;
     }
 
+    if (cardRef.current) {
+      setCardHeight(cardRef.current.offsetHeight);
+    }
+
     setIsSubmitting(true);
     setErrors({});
 
@@ -144,6 +158,7 @@ export const ContactSection: React.FC = () => {
     setErrors({});
     setIsSubmitted(false);
     setSubmittedData(null);
+    setCardHeight(undefined);
   };
 
   return (
@@ -157,7 +172,7 @@ export const ContactSection: React.FC = () => {
         </header>
 
         <div className="contact-grid">
-          
+
           <aside className="contact-info-card">
             <div className="info-card-top">
               <h3>Get in Touch Directly</h3>
@@ -201,51 +216,46 @@ export const ContactSection: React.FC = () => {
             </div>
           </aside>
 
-          <section className="contact-form-card">
-            {isSubmitted && submittedData ? (
-              <div className="contact-success-state">
-                <div className="success-badge-large">
-                  <CheckCircle2 size={40} />
+          <section
+            ref={cardRef}
+            className={`contact-form-card ${isSubmitted ? 'is-success-active' : ''}`}
+            style={cardHeight ? { minHeight: `${cardHeight}px` } : undefined}
+          >
+            {isSubmitted ? (
+              <div
+                ref={successStateRef}
+                className="contact-success-state"
+                role="status"
+                aria-live="polite"
+                tabIndex={-1}
+              >
+
+                <div className="success-logo-circle">
+                  <img src={logoMNavy} alt="Marcela's Cleaning Services" className="success-logo-img" />
                 </div>
-                <h2>Thank You, {submittedData.name}!</h2>
-                <p className="success-summary-desc">
-                  Your message has been received successfully. Our team will review your inquiry and get back to you promptly.
+
+                <h2 className="success-title">
+                  Thank you{submittedData?.name ? `, ${submittedData.name.trim().split(' ')[0]}` : ''}!
+                </h2>
+
+                <p className="success-response-timeline">
+                  We've received your inquiry and will respond within <strong>1–2 business hours</strong> via email{submittedData?.email ? <> to <span className="success-channel-badge">{submittedData.email}</span></> : ''}.
                 </p>
 
-                <div className="success-details-box">
-                  <div className="success-details-row">
-                    <span className="detail-label">Name:</span>
-                    <span className="detail-value">{submittedData.name}</span>
-                  </div>
-                  {submittedData.email && (
-                    <div className="success-details-row">
-                      <span className="detail-label">Email:</span>
-                      <span className="detail-value">{submittedData.email}</span>
-                    </div>
-                  )}
-                  {submittedData.phone && (
-                    <div className="success-details-row">
-                      <span className="detail-label">Phone:</span>
-                      <span className="detail-value">{submittedData.phone}</span>
-                    </div>
-                  )}
-                  <div className="success-details-row">
-                    <span className="detail-label">Message:</span>
-                    <span className="detail-value" style={{ maxWidth: '280px', textAlign: 'right' }}>
-                      {submittedData.message.length > 50
-                        ? `${submittedData.message.substring(0, 50)}...`
-                        : submittedData.message}
-                    </span>
-                  </div>
-                </div>
+                <p className="success-urgent-hint">
+                  <span>Need immediate service or have an urgent question?</span>{' '}
+                  <a href="tel:+13202493106" className="success-urgent-phone">
+                    Call +1 (320) 249-3106
+                  </a>
+                </p>
 
                 <div className="success-actions-wrap">
                   <button
                     type="button"
-                    className="btn-primary"
+                    className="btn-secondary-outline btn-send-another"
                     onClick={handleReset}
                   >
-                    Send Another Message
+                    Send another message
                   </button>
                 </div>
               </div>
@@ -263,7 +273,7 @@ export const ContactSection: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit} className="contact-form-element" noValidate>
-                  
+
                   <FormField
                     htmlFor="home-contact-name"
                     label="Full Name"
