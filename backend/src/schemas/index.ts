@@ -10,6 +10,22 @@ export const loginSchema = z.object({
     .min(1, 'La contraseña es requerida'),
 });
 
+export const registerSchema = z.object({
+  nombre: z
+    .string({ required_error: 'El nombre es requerido' })
+    .min(1, 'El nombre es requerido')
+    .transform((v) => v.trim()),
+  email: z
+    .string({ required_error: 'El correo electrónico es requerido' })
+    .email('Formato de correo electrónico inválido')
+    .transform((v) => v.trim().toLowerCase()),
+  password: z
+    .string({ required_error: 'La contraseña es requerida' })
+    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  telefono: z.string().optional(),
+  direccion: z.string().optional(),
+});
+
 export const contactSchema = z.object({
   name: z
     .string({ required_error: 'El nombre es obligatorio' })
@@ -60,6 +76,7 @@ export const cotizacionPublicSchema = z.object({
     z.record(z.number().int().min(0)),
     z.array(z.string()),
   ]).optional(),
+  addonLabels: z.array(z.string()).optional(),
   estimatedPrice: z.string().optional(),
   nombre: z.string().optional(),
   fullName: z.string().optional(),
@@ -75,6 +92,8 @@ export const cotizacionPublicSchema = z.object({
   sizeLabel: z.string().optional(),
   size: z.string().optional(),
   frequency: z.string().optional(),
+  preferredDate: z.string().optional(),
+  preferredTime: z.string().optional(),
 });
 
 const tipoLimpiezaEnum = z.enum([
@@ -99,11 +118,16 @@ export const cotizacionAdminSchema = z.object({
 });
 
 export const citaCreateSchema = z.object({
-  clienteId: z.string().uuid('ID de cliente inválido'),
+  clienteId: z.string().uuid('ID de cliente inválido').optional(),
+  nombreCliente: z.string().optional(),
+  telefonoCliente: z.string().optional(),
+  emailCliente: z.string().email().optional().or(z.literal('')),
+  tipoLimpieza: z.string().optional(),
+  totalEstimado: z.number().optional(),
   cotizacionId: z.string().uuid().optional(),
   fechaServicio: z.string().refine(
     (v) => !isNaN(Date.parse(v)),
-    { message: 'Fecha de servicio inválida (usar formato ISO)' }
+    { message: 'Fecha de servicio inválida (usar formato ISO o YYYY-MM-DD)' }
   ),
   horaInicio: z.string().regex(
     /^\d{2}:\d{2}$/,
@@ -117,6 +141,9 @@ export const citaCreateSchema = z.object({
   direccionServicio: z.string().min(1, 'La dirección del servicio es requerida'),
   notas: z.string().optional(),
 }).refine(
+  (data) => Boolean(data.clienteId || (data.nombreCliente && data.telefonoCliente)),
+  { message: 'Debe especificar clienteId o bien nombre y teléfono del cliente', path: ['clienteId'] }
+).refine(
   (data) => data.horaInicio < data.horaFin,
   { message: 'La hora de inicio debe ser anterior a la hora de fin', path: ['horaInicio'] }
 );
@@ -131,6 +158,7 @@ export const citaUpdateSchema = z.object({
   personalAsignado: z.string().optional(),
   direccionServicio: z.string().min(1).optional(),
   notas: z.string().optional(),
+  estadoCita: z.enum(['PROGRAMADA', 'EN_PROGRESO', 'COMPLETADA', 'CANCELADA']).optional(),
 });
 
 export const clienteCreateSchema = z.object({
