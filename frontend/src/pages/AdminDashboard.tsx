@@ -420,14 +420,14 @@ const SolicitudesPanel: React.FC<{
     let list = [...cotizaciones];
 
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
+      const q = (searchQuery || '').toLowerCase().trim();
       list = list.filter(
         (c) =>
-          c.codigo.toLowerCase().includes(q) ||
-          c.cliente.nombre.toLowerCase().includes(q) ||
-          (c.cliente.email && c.cliente.email.toLowerCase().includes(q)) ||
-          (c.cliente.telefono && c.cliente.telefono.includes(q)) ||
-          serviceLabel(c.tipoLimpieza).toLowerCase().includes(q)
+          (c.codigo || '').toLowerCase().includes(q) ||
+          (c.cliente?.nombre || '').toLowerCase().includes(q) ||
+          (c.cliente?.email && c.cliente.email.toLowerCase().includes(q)) ||
+          (c.cliente?.telefono && c.cliente.telefono.includes(q)) ||
+          serviceLabel(c.tipoLimpieza || '').toLowerCase().includes(q)
       );
     }
 
@@ -612,7 +612,7 @@ const SolicitudesPanel: React.FC<{
                     <td className="adm-date-cell">{formatDate(c.createdAt)}</td>
                     <td className="adm-price-cell">{formatCurrency(c.totalEstimado)}</td>
                     <td>
-                      <span className={`adm-badge adm-badge--${c.estado.toLowerCase()}`}>
+                      <span className={`adm-badge adm-badge--${(c.estado || '').toLowerCase()}`}>
                         {estadoLabel(c.estado)}
                       </span>
                     </td>
@@ -659,7 +659,7 @@ const SolicitudesPanel: React.FC<{
               <div key={c.id} className="adm-card-mobile">
                 <div className="adm-card-mobile-header">
                   <span className="adm-code">{c.codigo}</span>
-                  <span className={`adm-badge adm-badge--${c.estado.toLowerCase()}`}>
+                  <span className={`adm-badge adm-badge--${(c.estado || '').toLowerCase()}`}>
                     {estadoLabel(c.estado)}
                   </span>
                 </div>
@@ -1299,7 +1299,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                   {dayCitas.slice(0, 2).map((c) => (
                     <div
                       key={c.id}
-                      className={`adm-cal-event adm-cal-event--${c.estadoCita.toLowerCase()}`}
+                      className={`adm-cal-event adm-cal-event--${(c.estadoCita || '').toLowerCase()}`}
                       onClick={() => setSelectedCita(c)}
                       title={`${formatTime12h(c.horaInicio)} - ${c.cliente?.nombre || 'Client'} (${serviceLabel(
                         c.cotizacion?.tipoLimpieza || 'Service'
@@ -1398,7 +1398,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                     dayCitas.map((c) => (
                       <div
                         key={c.id}
-                        className={`adm-week-event adm-cal-event--${c.estadoCita.toLowerCase()}`}
+                        className={`adm-week-event adm-cal-event--${(c.estadoCita || '').toLowerCase()}`}
                         onClick={() => setSelectedCita(c)}
                       >
                         <div className="adm-week-event-time">
@@ -1413,7 +1413,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                         {c.cliente && (
                           <span className="adm-week-event-client">{c.cliente.nombre}</span>
                         )}
-                        <span className={`adm-badge adm-badge--cita-${c.estadoCita.toLowerCase()}`}>
+                        <span className={`adm-badge adm-badge--cita-${(c.estadoCita || '').toLowerCase()}`}>
                           {citaEstadoLabel(c.estadoCita)}
                         </span>
                       </div>
@@ -1453,7 +1453,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
             {citasHoy.map((c) => (
               <div
                 key={c.id}
-                className={`adm-today-card adm-today-card--${c.estadoCita.toLowerCase()}`}
+                className={`adm-today-card adm-today-card--${(c.estadoCita || '').toLowerCase()}`}
                 onClick={() => setSelectedCita(c)}
               >
                 <div className="adm-today-card-top">
@@ -1461,7 +1461,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                     <Clock size={12} />
                     {formatTime12h(c.horaInicio)} – {formatTime12h(c.horaFin)}
                   </span>
-                  <span className={`adm-badge adm-badge--cita-${c.estadoCita.toLowerCase()}`}>
+                  <span className={`adm-badge adm-badge--cita-${(c.estadoCita || '').toLowerCase()}`}>
                     {citaEstadoLabel(c.estadoCita)}
                   </span>
                 </div>
@@ -1629,7 +1629,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
               )}
               <div className="adm-modal-row adm-modal-row--full">
                 <span className="adm-modal-key">Current status</span>
-                <span className={`adm-badge adm-badge--cita-${selectedCita.estadoCita.toLowerCase()}`}>
+                <span className={`adm-badge adm-badge--cita-${(selectedCita?.estadoCita || '').toLowerCase()}`}>
                   {citaEstadoLabel(selectedCita.estadoCita)}
                 </span>
               </div>
