@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 import { FormField, TextInput, SubmitButton } from '../components/common';
@@ -11,13 +11,20 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { isAuthenticated, user, login, logout } = useAuth();
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
-      setError('Correo o contraseña incorrectos');
+      setError('Incorrect email or password');
       return;
     }
 
@@ -26,54 +33,30 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-    } catch {
-      setError('Correo o contraseña incorrectos');
+      navigate('/admin');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err?.message || 'Incorrect email or password');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    setEmail('');
-    setPassword('');
-    setError('');
-  };
-
   return (
     <div className="admin-login-page">
-      
+
       <div className="admin-login-stripe" aria-hidden="true" />
 
-      <div className="admin-login-container">
+      <div className="admin-login-left" aria-hidden="true" />
 
-        <h1 className="admin-login-title">Iniciar sesión</h1>
+      <div className="admin-login-right">
+        <div className="admin-login-container">
 
-        {isAuthenticated ? (
-          <div className="admin-auth-active">
-            <p className="admin-auth-info">
-              Sesión activa como <strong>{user?.email}</strong>
-            </p>
-            <div className="admin-login-actions">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="admin-login-btn"
-              >
-                Cerrar sesión
-              </button>
-              <Link to="/" className="admin-back-link">
-                Volver al sitio
-              </Link>
-            </div>
-          </div>
-        ) : (
+          <h1 className="admin-login-title">Sign in</h1>
+
           <form onSubmit={handleSubmit} className="admin-login-form" noValidate>
-            
-            <FormField
-              htmlFor="admin-email"
-              label="Correo electrónico"
-            >
+
+            <FormField htmlFor="admin-email" label="Email address">
               <TextInput
                 id="admin-email"
                 type="email"
@@ -89,10 +72,9 @@ export const LoginPage: React.FC = () => {
               />
             </FormField>
 
-            <FormField
-              htmlFor="admin-password"
-              label="Contraseña"
-            >
+            <div className="admin-login-field-gap" />
+
+            <FormField htmlFor="admin-password" label="Password">
               <div className="admin-input-wrapper">
                 <input
                   id="admin-password"
@@ -111,7 +93,7 @@ export const LoginPage: React.FC = () => {
                   type="button"
                   className="admin-password-toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -122,12 +104,12 @@ export const LoginPage: React.FC = () => {
             <div className="admin-login-actions">
               <SubmitButton
                 loading={isLoading}
-                loadingText="Entrando..."
-                label="Entrar"
+                loadingText="Signing in..."
+                label="Sign in"
                 className="admin-login-btn"
               />
               <Link to="/" className="admin-back-link">
-                Volver al sitio
+                Back to website
               </Link>
             </div>
 
@@ -135,8 +117,9 @@ export const LoginPage: React.FC = () => {
               {error && <span className="admin-error-text">{error}</span>}
             </div>
           </form>
-        )}
+        </div>
       </div>
+
     </div>
   );
 };
