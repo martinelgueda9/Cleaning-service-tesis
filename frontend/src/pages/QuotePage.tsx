@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -102,6 +102,7 @@ export const QuotePage: React.FC = () => {
   const [quoteReference, setQuoteReference] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const isSubmittingRef = useRef<boolean>(false);
 
   const handleSelectService = (id: string) => {
     if (selectedService !== id) {
@@ -169,6 +170,8 @@ export const QuotePage: React.FC = () => {
   };
 
   const handleContactSubmit = async (formData: ContactFormData) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setContactInfo(formData);
     setIsSubmitting(true);
     setSubmitError(null);
@@ -227,10 +230,12 @@ export const QuotePage: React.FC = () => {
       );
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 
   const handleReset = () => {
+    isSubmittingRef.current = false;
     setSubmitted(false);
     setStep(1);
     setSelectedService('');
