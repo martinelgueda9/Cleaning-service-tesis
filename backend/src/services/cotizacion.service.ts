@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { TipoLimpieza, EstadoCotizacion } from '@prisma/client';
 import * as pricingService from './pricing.service.js';
+import { checkScheduleConflict } from './agenda.service.js';
 
 function generateCodigo(): string {
   const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -423,49 +424,71 @@ export async function revisar(
   }
 
   const estado: EstadoCotizacion = accion === 'aceptar' ? 'ACEPTADA' : 'RECHAZADA';
+  const crearCita = accion === 'aceptar' && !!citaData && !!citaData.fechaServicio;
 
-  const updatedCotizacion = await prisma.cotizacion.update({
-    where: { id },
-    data: {
-      estado,
-      motivoRechazo: accion === 'rechazar' ? (motivo || null) : null,
-      fechaRevision: new Date(),
-      revisadoPorId,
-    },
-    include: {
-      cliente: true,
-      revisadoPor: { select: { id: true, nombre: true, email: true } },
-      citas: true,
-    },
-  });
+  const fechaServicio = crearCita ? new Date(citaData!.fechaServicio) : null;
+  const horaInicio = citaData?.horaInicio || '09:00';
+  const horaFin = citaData?.horaFin || '12:00';
 
-  let createdCita = null;
-  if (accion === 'aceptar' && citaData && citaData.fechaServicio) {
-    createdCita = await prisma.cita.create({
+  if (crearCita && fechaServicio) {
+    if (horaInicio >= horaFin) {
+      throw new Error('End time must be after start time');
+    }
+
+    const hasConflict = await checkScheduleConflict(fechaServicio, horaInicio, horaFin);
+    if (hasConflict) {
+      throw new Error(
+        `Schedule conflict: An appointment already exists on that date that overlaps with the requested time ` +
+          `${horaInicio} - ${horaFin}. Please choose a different time slot.`
+      );
+    }
+  }
+
+  // Cotización y cita se guardan juntas: si algo falla, no queda ninguna a medias.
+  return prisma.$transaction(async (tx) => {
+    const updatedCotizacion = await tx.cotizacion.update({
+      where: { id },
       data: {
-        codigo: generateCitaCodigo(),
-        clienteId: cotizacion.clienteId,
-        cotizacionId: cotizacion.id,
-        fechaServicio: new Date(citaData.fechaServicio),
-        horaInicio: citaData.horaInicio || '09:00',
-        horaFin: citaData.horaFin || '12:00',
-        direccionServicio:
-          citaData.direccionServicio || cotizacion.cliente.direccion || 'St. Cloud, MN',
-        personalAsignado: citaData.personalAsignado || undefined,
-        notas: citaData.notas || undefined,
-        estadoCita: 'PROGRAMADA',
+        estado,
+        motivoRechazo: accion === 'rechazar' ? (motivo || null) : null,
+        fechaRevision: new Date(),
+        revisadoPorId,
       },
       include: {
         cliente: true,
-        cotizacion: true,
+        revisadoPor: { select: { id: true, nombre: true, email: true } },
+        citas: true,
       },
     });
-  }
 
-  return {
-    ...updatedCotizacion,
-    citaCreada: createdCita,
-  };
+    let createdCita = null;
+    if (crearCita && fechaServicio) {
+      createdCita = await tx.cita.create({
+        data: {
+          codigo: generateCitaCodigo(),
+          clienteId: cotizacion.clienteId,
+          cotizacionId: cotizacion.id,
+          fechaServicio,
+          horaInicio,
+          horaFin,
+          direccionServicio:
+            citaData!.direccionServicio || cotizacion.cliente.direccion || 'St. Cloud, MN',
+          personalAsignado: citaData!.personalAsignado || undefined,
+          notas: citaData!.notas || undefined,
+          estadoCita: 'PROGRAMADA',
+        },
+        include: {
+          cliente: true,
+          cotizacion: true,
+        },
+      });
+    }
+
+    return {
+      ...updatedCotizacion,
+      citaCreada: createdCita,
+    };
+  });
 }
 
 export async function remove(id: string) {

@@ -6,7 +6,7 @@ function generateCodigo(): string {
   return `CIT-${rand}`;
 }
 
-async function checkScheduleConflict(
+export async function checkScheduleConflict(
   fechaServicio: Date,
   horaInicio: string,
   horaFin: string,
@@ -146,8 +146,8 @@ export async function create(data: {
 
   if (hasConflict) {
     throw new Error(
-      `Conflicto de horario: ya existe una cita programada en la fecha ${data.fechaServicio} ` +
-      `que se solapa con el horario ${data.horaInicio} - ${data.horaFin}`
+      `Schedule conflict: An appointment already exists on ${data.fechaServicio} ` +
+      `that overlaps with the requested time ${data.horaInicio} - ${data.horaFin}`
     );
   }
 
@@ -192,8 +192,8 @@ export async function update(id: string, data: {
 
     if (hasConflict) {
       throw new Error(
-        `Conflicto de horario: ya existe una cita programada que se solapa ` +
-        `con el horario ${horaInicio} - ${horaFin}`
+        `Schedule conflict: An appointment already exists that overlaps ` +
+        `with the requested time ${horaInicio} - ${horaFin}`
       );
     }
   }
