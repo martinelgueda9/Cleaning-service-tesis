@@ -34,6 +34,28 @@ enum EstadoCita {
   CANCELADA
 }
 
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  ANULADO
+}
+
+enum MetodoPago {
+  EFECTIVO
+  ZELLE
+  TARJETA
+  TRANSFERENCIA
+  VENMO
+  CASHAPP
+  CHEQUE
+  OTRO
+}
+
+enum OrigenVenta {
+  CITA
+  MANUAL
+}
+
 model Usuario {
   id        String   @id @default(uuid())
   nombre    String
@@ -113,6 +135,7 @@ model Cliente {
   usuario       Usuario?
   cotizaciones  Cotizacion[]
   citas         Cita[]
+  ventas        Venta[]
 
   @@map("clientes")
 }
@@ -144,6 +167,7 @@ model Cotizacion {
   updatedAt             DateTime          @updatedAt
 
   citas                 Cita[]
+  ventas                Venta[]
 
   @@map("cotizaciones")
 }
@@ -168,5 +192,39 @@ model Cita {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
+  venta              Venta?
+
   @@map("citas")
+}
+
+model Venta {
+  id               String       @id @default(uuid())
+  codigo           String       @unique
+  clienteId        String
+  cliente          Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  origen           OrigenVenta  @default(MANUAL)
+  citaId           String?      @unique
+  cita             Cita?        @relation(fields: [citaId], references: [id], onDelete: SetNull)
+  cotizacionId     String?
+  cotizacion       Cotizacion?  @relation(fields: [cotizacionId], references: [id], onDelete: SetNull)
+
+  tipoLimpieza     TipoLimpieza @default(ESTANDAR)
+  fechaServicio    DateTime
+
+  montoCotizado    Float        @default(0)
+  montoFinal       Float?
+
+  estadoPago       EstadoPago   @default(PENDIENTE)
+  metodoPago       MetodoPago?
+  fechaPago        DateTime?
+  motivoAnulacion  String?
+  notas            String?
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([estadoPago])
+  @@index([fechaServicio])
+  @@map("ventas")
 }
