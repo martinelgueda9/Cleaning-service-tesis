@@ -19,6 +19,11 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import '../styles/admin.css';
+import { apiFetch, serviceLabel } from '../utils/adminApi';
+import { VentasPanel } from '../components/admin/ventas/VentasPanel';
+import { ClientesPanel } from '../components/admin/clientes/ClientesPanel';
+
+export { serviceLabel };
 
 interface Cotizacion {
   id: string;
@@ -73,49 +78,35 @@ interface Cita {
     tipoLimpieza: string;
     totalEstimado?: number;
   };
+  venta?: {
+    id: string;
+    codigo: string;
+    estadoPago: 'PENDIENTE' | 'PAGADO' | 'ANULADO';
+  } | null;
 }
 
-type ActiveTab = 'solicitudes' | 'agenda';
+type ActiveTab = 'solicitudes' | 'agenda' | 'ventas' | 'clientes';
 type FilterView = 'mensual' | 'semanal';
 type StartOfWeekDay = 'sunday' | 'monday';
 
-const API_BASE = '/api';
-
-async function apiFetch(url: string, token: string, options: RequestInit = {}) {
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-    ...options.headers,
-  };
-  try {
-    const res = await fetch(`${API_BASE}${url}`, { ...options, headers });
-    return res;
-  } catch {
-    return fetch(`http://localhost:3000${API_BASE}${url}`, { ...options, headers });
-  }
-}
-
-export function serviceLabel(tipo: string): string {
-  const map: Record<string, string> = {
-    ESTANDAR: 'Standard Cleaning',
-    standard: 'Standard Cleaning',
-    regular_cleaning: 'Standard Cleaning',
-    PROFUNDA: 'Deep Cleaning',
-    deep: 'Deep Cleaning',
-    deep_cleaning: 'Deep Cleaning',
-    MUDANZA_ENTRADA: 'Move-In Cleaning',
-    movein: 'Move-In Cleaning',
-    move_in_cleaning: 'Move-In Cleaning',
-    MUDANZA_SALIDA: 'Move-Out Cleaning',
-    moveout: 'Move-Out Cleaning',
-    move_out_cleaning: 'Move-Out Cleaning',
-    POST_CONSTRUCCION: 'Post-Construction',
-    post_construccion: 'Post-Construction',
-    OFICINA: 'Commercial / Office',
-    commercial_cleaning: 'Commercial / Office',
-  };
-  return map[tipo] || tipo;
-}
+const TAB_HEADERS: Record<ActiveTab, { title: string; sub: string }> = {
+  solicitudes: {
+    title: 'Quote Requests',
+    sub: 'Review, accept and schedule appointments or decline customer requests.',
+  },
+  agenda: {
+    title: 'Service Schedule',
+    sub: 'View calendar, upcoming services, and schedule manual appointments.',
+  },
+  ventas: {
+    title: 'Sales',
+    sub: 'Track every completed service, record payments and export reports.',
+  },
+  clientes: {
+    title: 'Clients',
+    sub: 'Client history: total spent, services, sales, appointments and quotes.',
+  },
+};
 
 function formatDate(iso: string) {
   if (!iso) return '—';
@@ -1150,9 +1141,15 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || 'Error updating status');
 
-      showToast(`Status updated to ${citaEstadoLabel(nuevoEstado)} `, 'ok');
+      const venta = data.data?.venta as Cita['venta'];
+      showToast(
+        nuevoEstado === 'COMPLETADA' && venta
+          ? `Completed — sale ${venta.codigo} is in Sales`
+          : `Status updated to ${citaEstadoLabel(nuevoEstado)} `,
+        'ok'
+      );
       if (selectedCita && selectedCita.id === id) {
-        setSelectedCita({ ...selectedCita, estadoCita: nuevoEstado as any });
+        setSelectedCita({ ...selectedCita, estadoCita: nuevoEstado as any, venta: venta ?? selectedCita.venta });
       }
       loadCitas();
     } catch (err) {
@@ -1633,6 +1630,15 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                   <p className="adm-modal-text">{selectedCita.notas}</p>
                 </div>
               )}
+              {selectedCita.venta && (
+                <div className="adm-modal-row">
+                  <span className="adm-modal-key">Sale</span>
+                  <span className="adm-modal-val">
+                    <span className="adm-code">{selectedCita.venta.codigo}</span>{' '}
+                    ({{ PENDIENTE: 'Pending payment', PAGADO: 'Paid', ANULADO: 'Voided' }[selectedCita.venta.estadoPago]})
+                  </span>
+                </div>
+              )}
               <div className="adm-modal-row adm-modal-row--full">
                 <span className="adm-modal-key">Current status</span>
                 <span className={`adm-badge adm-badge--cita-${(selectedCita?.estadoCita || '').toLowerCase()}`}>
@@ -1926,6 +1932,18 @@ export const AdminDashboard: React.FC = () => {
           >
             <span>Schedule</span>
           </button>
+          <button
+            className={`adm-nav-item ${activeTab === 'ventas' ? 'adm-nav-item--active' : ''}`}
+            onClick={() => setActiveTab('ventas')}
+          >
+            <span>Sales</span>
+          </button>
+          <button
+            className={`adm-nav-item ${activeTab === 'clientes' ? 'adm-nav-item--active' : ''}`}
+            onClick={() => setActiveTab('clientes')}
+          >
+            <span>Clients</span>
+          </button>
         </nav>
 
         <div className="adm-sidebar-footer">
@@ -1941,17 +1959,15 @@ export const AdminDashboard: React.FC = () => {
 
       <main className="adm-main">
         <header className="adm-header">
-          <h1 className="adm-header-title">
-            {activeTab === 'solicitudes' ? 'Quote Requests' : 'Service Schedule'}
-          </h1>
-          <p className="adm-header-sub">
-            {activeTab === 'solicitudes'
-              ? 'Review, accept and schedule appointments or decline customer requests.'
-              : 'View calendar, upcoming services, and schedule manual appointments.'}
-          </p>
+          <h1 className="adm-header-title">{TAB_HEADERS[activeTab].title}</h1>
+          <p className="adm-header-sub">{TAB_HEADERS[activeTab].sub}</p>
         </header>
 
-        {activeTab === 'solicitudes' ? (
+        {activeTab === 'ventas' ? (
+          <VentasPanel token={token} />
+        ) : activeTab === 'clientes' ? (
+          <ClientesPanel token={token} />
+        ) : activeTab === 'solicitudes' ? (
           <SolicitudesPanel
             token={token}
             onCitaCreated={() => {

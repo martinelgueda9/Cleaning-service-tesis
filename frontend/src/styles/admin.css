@@ -161,6 +161,7 @@
 .adm-main {
   margin-left: 240px;
   flex: 1;
+  min-width: 0;
   padding: 2rem 2.25rem;
   min-height: 100vh;
 }
@@ -1580,6 +1581,10 @@
 }
 
 @media (max-width: 768px) {
+  .adm-layout {
+    flex-direction: column;
+  }
+
   .adm-sidebar {
     width: 100%;
     min-height: auto;
