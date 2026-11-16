@@ -1,0 +1,6 @@
+.env
+.env.*
+.git
+cypress/screenshots
+dist
+node_modules
