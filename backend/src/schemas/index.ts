@@ -174,3 +174,62 @@ export const clienteCreateSchema = z.object({
 });
 
 export const clienteUpdateSchema = clienteCreateSchema.partial();
+
+export const metodoPagoEnum = z.enum([
+  'EFECTIVO',
+  'ZELLE',
+  'TARJETA',
+  'TRANSFERENCIA',
+  'VENMO',
+  'CASHAPP',
+  'CHEQUE',
+  'OTRO',
+]);
+
+const fechaSchema = (msg: string) =>
+  z.string().refine((v) => !isNaN(Date.parse(v)), { message: msg });
+
+const montoSchema = z.number({ invalid_type_error: 'El monto debe ser un número' }).min(0, 'El monto no puede ser negativo');
+
+export const ventaCreateSchema = z.object({
+  clienteId: z.string().uuid('ID de cliente inválido').optional(),
+  nombreCliente: z.string().trim().optional(),
+  telefonoCliente: z.string().trim().optional(),
+  emailCliente: z.string().email('Correo inválido').optional().or(z.literal('')),
+  direccionCliente: z.string().optional(),
+  tipoLimpieza: tipoLimpiezaEnum,
+  fechaServicio: fechaSchema('Fecha de servicio inválida (usar formato YYYY-MM-DD)'),
+  montoCotizado: montoSchema,
+  montoFinal: montoSchema.optional(),
+  notas: z.string().optional(),
+  pagado: z.boolean().optional(),
+  metodoPago: metodoPagoEnum.optional(),
+  fechaPago: fechaSchema('Fecha de pago inválida').optional(),
+}).refine(
+  (d) => Boolean(d.clienteId || (d.nombreCliente && d.telefonoCliente)),
+  { message: 'Debe especificar clienteId o bien nombre y teléfono del cliente', path: ['clienteId'] }
+).refine(
+  (d) => !d.pagado || Boolean(d.metodoPago),
+  { message: 'Indique el método de pago', path: ['metodoPago'] }
+);
+
+export const ventaUpdateSchema = z.object({
+  tipoLimpieza: tipoLimpiezaEnum.optional(),
+  fechaServicio: fechaSchema('Fecha de servicio inválida').optional(),
+  montoCotizado: montoSchema.optional(),
+  montoFinal: montoSchema.nullable().optional(),
+  metodoPago: metodoPagoEnum.nullable().optional(),
+  fechaPago: fechaSchema('Fecha de pago inválida').nullable().optional(),
+  notas: z.string().nullable().optional(),
+});
+
+export const ventaPagoSchema = z.object({
+  montoFinal: montoSchema,
+  metodoPago: metodoPagoEnum,
+  fechaPago: fechaSchema('Fecha de pago inválida'),
+  notas: z.string().optional(),
+});
+
+export const ventaAnularSchema = z.object({
+  motivo: z.string().trim().max(500).optional(),
+});
