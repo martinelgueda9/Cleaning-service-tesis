@@ -1,5 +1,15 @@
 import prisma from '../config/db.js';
 import { EstadoCita } from '@prisma/client';
+import { crearDesdeCita } from './ventas.service.js';
+
+async function generarVentaSiCompletada(citaId: string, estadoCita?: EstadoCita) {
+  if (estadoCita !== 'COMPLETADA') return;
+  try {
+    await crearDesdeCita(citaId);
+  } catch (err) {
+    console.error(`No se pudo crear la venta de la cita ${citaId}:`, err);
+  }
+}
 
 function generateCodigo(): string {
   const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -55,7 +65,7 @@ export async function findAll(filters?: { desde?: string; hasta?: string; estado
   return prisma.cita.findMany({
     where,
     orderBy: { fechaServicio: 'asc' },
-    include: { cliente: true, cotizacion: true },
+    include: { cliente: true, cotizacion: true, venta: { select: { id: true, codigo: true, estadoPago: true } } },
   });
 }
 
@@ -202,18 +212,21 @@ export async function update(id: string, data: {
   if (data.fechaServicio) {
     updateData.fechaServicio = new Date(data.fechaServicio);
   }
-  return prisma.cita.update({
+  const cita = await prisma.cita.update({
     where: { id },
     data: updateData,
     include: { cliente: true },
   });
+  await generarVentaSiCompletada(id, data.estadoCita);
+  return cita;
 }
 
 export async function updateEstado(id: string, estadoCita: EstadoCita) {
-  return prisma.cita.update({
+  await prisma.cita.update({ where: { id }, data: { estadoCita } });
+  await generarVentaSiCompletada(id, estadoCita);
+  return prisma.cita.findUnique({
     where: { id },
-    data: { estadoCita },
-    include: { cliente: true, cotizacion: true },
+    include: { cliente: true, cotizacion: true, venta: { select: { id: true, codigo: true, estadoPago: true } } },
   });
 }
 
