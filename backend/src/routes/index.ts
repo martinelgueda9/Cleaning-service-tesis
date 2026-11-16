@@ -5,6 +5,7 @@ import cotizacionRoutes from './cotizacion.routes.js';
 import agendaRoutes from './agenda.routes.js';
 import contactRoutes from './contact.routes.js';
 import pricingRoutes from './pricing.routes.js';
+import ventasRoutes from './ventas.routes.js';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/cotizaciones', cotizacionRoutes);
 router.use('/agenda', agendaRoutes);
 router.use('/contact', contactRoutes);
 router.use('/pricing', pricingRoutes);
+router.use('/ventas', ventasRoutes);
 
 export default router;
