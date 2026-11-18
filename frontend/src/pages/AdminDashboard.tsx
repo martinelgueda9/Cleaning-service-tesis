@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -19,9 +19,19 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import '../styles/admin.css';
-import { apiFetch, serviceLabel } from '../utils/adminApi';
+import { apiFetch, propertyTypeLabel, serviceLabel } from '../utils/adminApi';
+import { useMinDuration } from '../utils/useMinDuration';
 import { VentasPanel } from '../components/admin/ventas/VentasPanel';
 import { ClientesPanel } from '../components/admin/clientes/ClientesPanel';
+import { MopLoader, MopSpinner, Skeleton, TableSkeleton } from '../components/common';
+
+const SKEL_EVENT_COUNTS = [1, 2, 0, 1, 1, 0, 2, 1, 0];
+const skeletonEvents = (seed: number, className: string) =>
+  Array.from({ length: SKEL_EVENT_COUNTS[seed % SKEL_EVENT_COUNTS.length] }, (_, i) => (
+    <Skeleton key={i} className={className} width={i === 0 ? '88%' : '64%'} />
+  ));
+
+const TAB_LOADER_MS = 900;
 
 export { serviceLabel };
 
@@ -49,6 +59,7 @@ interface Cotizacion {
   fechaPreferida?: string | null;
   horaPreferida?: string | null;
   tamanio?: string | null;
+  tipoPropiedad?: 'DEPARTAMENTO' | 'CASA' | null;
   frecuencia?: string | null;
   notasCliente?: string | null;
   zona?: 'local' | 'extended' | 'out_of_zone';
@@ -278,7 +289,8 @@ const SolicitudesPanel: React.FC<{
   onPendingCountChange?: (count: number) => void;
 }> = ({ token, onCitaCreated, onPendingCountChange }) => {
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRaw, setLoading] = useState(true);
+  const loading = useMinDuration(loadingRaw);
   const [filterEstado, setFilterEstado] = useState<string>('PENDIENTE');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'preferred_date' | 'created_at' | 'price' | 'client'>(
@@ -505,7 +517,21 @@ const SolicitudesPanel: React.FC<{
       </div>
 
       {loading ? (
-        <div className="adm-loading">Loading requests…</div>
+        <TableSkeleton
+          headers={[
+            'Code',
+            'Client & Contact',
+            'Service & Size',
+            'Extras',
+            'Location',
+            'Preferred Date',
+            'Received',
+            'Estimate',
+            'Status',
+            'Actions',
+          ]}
+          label="Loading requests…"
+        />
       ) : filteredCotizaciones.length === 0 ? (
         <div className="adm-empty">
           No requests found{searchQuery ? ` matching "${searchQuery}"` : ''}
@@ -547,6 +573,7 @@ const SolicitudesPanel: React.FC<{
                     <td>
                       <strong className="adm-service-title">{serviceLabel(c.tipoLimpieza)}</strong>
                       <div className="adm-service-size">
+                        {propertyTypeLabel(c.tipoPropiedad) && `${propertyTypeLabel(c.tipoPropiedad)} · `}
                         {c.tamanio || (c.numHabitaciones ? `${c.numHabitaciones}b / ${c.numBanos}ba` : '—')}
                       </div>
                       {c.frecuencia && (
@@ -691,6 +718,7 @@ const SolicitudesPanel: React.FC<{
                   <div className="adm-card-service-box">
                     <div className="adm-card-service-title">{serviceLabel(c.tipoLimpieza)}</div>
                     <div className="adm-card-service-meta">
+                      {propertyTypeLabel(c.tipoPropiedad) && <span>{propertyTypeLabel(c.tipoPropiedad)} • </span>}
                       <span>{c.tamanio || 'Size not specified'}</span>
                       {c.frecuencia && <span> • {c.frecuencia}</span>}
                     </div>
@@ -837,6 +865,10 @@ const SolicitudesPanel: React.FC<{
                   <div className="adm-modal-row">
                     <span className="adm-modal-key">Service</span>
                     <strong className="adm-modal-val">{serviceLabel(selected.tipoLimpieza)}</strong>
+                  </div>
+                  <div className="adm-modal-row">
+                    <span className="adm-modal-key">Property</span>
+                    <span className="adm-modal-val">{propertyTypeLabel(selected.tipoPropiedad) || 'Not specified'}</span>
                   </div>
                   <div className="adm-modal-row">
                     <span className="adm-modal-key">Size / Layout</span>
@@ -1034,7 +1066,7 @@ const SolicitudesPanel: React.FC<{
                     onClick={handleRevisar}
                     disabled={submitting || !citaFecha || !citaHoraInicio || !citaHoraFin}
                   >
-                    {submitting ? 'Creating appointment…' : ' Confirm & Schedule on Calendar'}
+                    {submitting ? <><MopSpinner />Creating appointment…</> : ' Confirm & Schedule on Calendar'}
                   </button>
                   <button className="adm-modal-btn adm-modal-btn--cancel" onClick={closeModal}>
                     Cancel
@@ -1070,7 +1102,7 @@ const SolicitudesPanel: React.FC<{
                     onClick={handleRevisar}
                     disabled={submitting}
                   >
-                    {submitting ? 'Processing…' : 'Confirm Decline'}
+                    {submitting ? <><MopSpinner />Processing…</> : 'Confirm Decline'}
                   </button>
                   <button className="adm-modal-btn adm-modal-btn--cancel" onClick={closeModal}>
                     Back
@@ -1087,7 +1119,8 @@ const SolicitudesPanel: React.FC<{
 
 const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
   const [citas, setCitas] = useState<Cita[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRaw, setLoading] = useState(true);
+  const loading = useMinDuration(loadingRaw);
   const [view, setView] = useState<FilterView>('mensual');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [startDay, setStartDay] = useState<StartOfWeekDay>('sunday');
@@ -1299,7 +1332,8 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
               >
                 <span className="adm-cal-day-num">{day.getDate()}</span>
                 <div className="adm-cal-events-list">
-                  {dayCitas.slice(0, 2).map((c) => (
+                  {loading && skeletonEvents(day.getDate(), 'skel--cal-event')}
+                  {!loading && dayCitas.slice(0, 2).map((c) => (
                     <div
                       key={c.id}
                       className={`adm-cal-event adm-cal-event--${(c.estadoCita || '').toLowerCase()}`}
@@ -1314,7 +1348,7 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                       </span>
                     </div>
                   ))}
-                  {dayCitas.length > 2 && (
+                  {!loading && dayCitas.length > 2 && (
                     <div
                       className="adm-cal-more"
                       onClick={() => setSelectedCita(dayCitas[2])}
@@ -1395,7 +1429,9 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
                   </span>
                 </div>
                 <div className="adm-week-col-events">
-                  {dayCitas.length === 0 ? (
+                  {loading ? (
+                    skeletonEvents(wDay.getDate() + 1, 'skel--week-event')
+                  ) : dayCitas.length === 0 ? (
                     <span className="adm-week-empty-day">—</span>
                   ) : (
                     dayCitas.map((c) => (
@@ -1538,13 +1574,10 @@ const AgendaPanel: React.FC<{ token: string }> = ({ token }) => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="adm-loading">Loading schedule…</div>
-      ) : view === 'mensual' ? (
-        renderMonthly()
-      ) : (
-        renderWeekly()
-      )}
+      <div className={loading ? 'adm-cal-loading' : undefined} aria-busy={loading}>
+        {loading && <span className="skel-sr-only" role="status">Loading schedule…</span>}
+        {view === 'mensual' ? renderMonthly() : renderWeekly()}
+      </div>
 
       <div className="adm-legend">
         <span className="adm-legend-title">Appointment statuses:</span>
@@ -1880,6 +1913,19 @@ export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>('solicitudes');
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [switchingTo, setSwitchingTo] = useState<ActiveTab | null>(null);
+  const switchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (switchTimer.current) clearTimeout(switchTimer.current);
+  }, []);
+
+  const changeTab = (tab: ActiveTab) => {
+    if (tab === activeTab || switchingTo) return;
+    setSwitchingTo(tab);
+    setActiveTab(tab);
+    switchTimer.current = setTimeout(() => setSwitchingTo(null), TAB_LOADER_MS);
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -1907,6 +1953,7 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="adm-layout">
+      {switchingTo && <MopLoader label={`Loading ${TAB_HEADERS[switchingTo].title}`} />}
 
       <aside className="adm-sidebar">
         <div className="adm-sidebar-brand">
@@ -1917,7 +1964,7 @@ export const AdminDashboard: React.FC = () => {
         <nav className="adm-sidebar-nav">
           <button
             className={`adm-nav-item ${activeTab === 'solicitudes' ? 'adm-nav-item--active' : ''}`}
-            onClick={() => setActiveTab('solicitudes')}
+            onClick={() => changeTab('solicitudes')}
           >
             <span>Requests</span>
             {pendingCount > 0 && (
@@ -1928,19 +1975,19 @@ export const AdminDashboard: React.FC = () => {
           </button>
           <button
             className={`adm-nav-item ${activeTab === 'agenda' ? 'adm-nav-item--active' : ''}`}
-            onClick={() => setActiveTab('agenda')}
+            onClick={() => changeTab('agenda')}
           >
             <span>Schedule</span>
           </button>
           <button
             className={`adm-nav-item ${activeTab === 'ventas' ? 'adm-nav-item--active' : ''}`}
-            onClick={() => setActiveTab('ventas')}
+            onClick={() => changeTab('ventas')}
           >
             <span>Sales</span>
           </button>
           <button
             className={`adm-nav-item ${activeTab === 'clientes' ? 'adm-nav-item--active' : ''}`}
-            onClick={() => setActiveTab('clientes')}
+            onClick={() => changeTab('clientes')}
           >
             <span>Clients</span>
           </button>
