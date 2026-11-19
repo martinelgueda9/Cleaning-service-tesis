@@ -13,7 +13,15 @@ import {
 import { StepIndicator } from '../components/cotizacion/StepIndicator';
 import { StepDetails } from '../components/cotizacion/StepDetails';
 import { StepContactInfo, ContactFormData } from '../components/cotizacion/StepContactInfo';
-import { SERVICE_ID_TO_KEY, ServiceKey, PRICING, ADDONS } from '../data/pricing';
+import {
+  SERVICE_ID_TO_KEY,
+  ServiceKey,
+  PRICING,
+  ADDONS,
+  DEFAULT_PROPERTY_TYPE,
+  PROPERTY_TYPE_LABEL,
+  type PropertyType,
+} from '../data/pricing';
 import { estimate, formatEstimatePrice } from '../utils/estimate';
 import logoMNavy from '../assets/logo_m_navy.jpg';
 
@@ -96,6 +104,7 @@ export const QuotePage: React.FC = () => {
   const [step, setStep] = useState<number>(1);
   const [selectedService, setSelectedService] = useState<string>('');
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
+  const [propertyType, setPropertyType] = useState<PropertyType>(DEFAULT_PROPERTY_TYPE);
   const [selectedAddons, setSelectedAddons] = useState<Record<string, number>>({});
   const [contactInfo, setContactInfo] = useState<ContactFormData | null>(null);
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -192,6 +201,7 @@ export const QuotePage: React.FC = () => {
         addonLabels: activeAddonNames,
         serviceLabel: activeServiceObj?.label,
         sizeLabel: sizeOption?.label,
+        propertyType: serviceKey ? propertyType : undefined,
         estimatedPrice: finalPriceDisplay,
         nombre: formData.fullName,
         email: formData.email,
@@ -240,6 +250,7 @@ export const QuotePage: React.FC = () => {
     setStep(1);
     setSelectedService('');
     setSelectedSizeId(null);
+    setPropertyType(DEFAULT_PROPERTY_TYPE);
     setSelectedAddons({});
     setContactInfo(null);
     setQuoteReference(null);
@@ -319,6 +330,13 @@ export const QuotePage: React.FC = () => {
                 <span className="recap-label">Service:</span>
                 <strong className="recap-value">{activeServiceObj?.label}</strong>
               </div>
+
+              {serviceKey && (
+                <div className="recap-row">
+                  <span className="recap-label">Property:</span>
+                  <strong className="recap-value">{PROPERTY_TYPE_LABEL[propertyType]}</strong>
+                </div>
+              )}
 
               {sizeOption && (
                 <div className="recap-row">
@@ -475,6 +493,8 @@ export const QuotePage: React.FC = () => {
 
           <StepDetails
             serviceKey={serviceKey}
+            propertyType={propertyType}
+            onChangePropertyType={setPropertyType}
             selectedSizeId={selectedSizeId}
             onSelectSize={(sizeId) => setSelectedSizeId(sizeId)}
             selectedAddons={selectedAddons}
