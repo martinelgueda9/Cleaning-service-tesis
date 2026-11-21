@@ -5,6 +5,9 @@ import './styles/index.css';
 import './styles/common.css';
 import './styles/quote.css';
 import './styles/login.css';
+import './styles/mop-loader.css';
+import './styles/skeleton.css';
+import './styles/property-visualizer.css';
 import './styles/contact.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
