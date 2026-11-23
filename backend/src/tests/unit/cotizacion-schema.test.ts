@@ -60,5 +60,32 @@ describe('Cotización Schemas - cotizacionPublicSchema y cotizacionAdminSchema (
     const resultInvalido = cotizacionAdminSchema.safeParse(inputIdInvalido);
     expect(resultInvalido.success).toBe(false);
   });
-});
 
+  describe('propertyType (Apartment / House)', () => {
+    const base = { serviceType: 'regular_cleaning', sizeId: '2bed_1bath', fullName: 'María Gómez', phone: '3205551234' };
+
+    it('debe aceptar propertyType válido ("apartment" y "house")', () => {
+      for (const propertyType of ['apartment', 'house']) {
+        const result = cotizacionPublicSchema.safeParse({ ...base, propertyType });
+        expect(result.success).toBe(true);
+        if (result.success) expect(result.data.propertyType).toBe(propertyType);
+      }
+    });
+
+    it('debe rechazar un propertyType inválido', () => {
+      for (const propertyType of ['condo', 'DEPARTAMENTO', '', 1]) {
+        const result = cotizacionPublicSchema.safeParse({ ...base, propertyType });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues.some((i) => i.path.includes('propertyType'))).toBe(true);
+        }
+      }
+    });
+
+    it('debe aceptar la cotización cuando propertyType no viene (es opcional)', () => {
+      const result = cotizacionPublicSchema.safeParse(base);
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.data.propertyType).toBeUndefined();
+    });
+  });
+});
