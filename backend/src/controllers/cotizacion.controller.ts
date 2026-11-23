@@ -80,6 +80,8 @@ export async function createPublic(req: Request, res: Response) {
       clientPhone: req.body.telefono || req.body.phone,
       serviceType: req.body.serviceLabel || req.body.serviceName || serviceType,
       sizeLabel: req.body.sizeLabel || req.body.size,
+      propertyType:
+        req.body.propertyType === 'apartment' ? 'Apartment' : req.body.propertyType === 'house' ? 'House' : undefined,
       addons: addonsList,
       estimatedPrice: req.body.estimatedPrice,
       address: req.body.direccion || req.body.address,
