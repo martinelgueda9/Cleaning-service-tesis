@@ -23,6 +23,7 @@ export interface QuoteNotificationData {
   clientPhone?: string;
   serviceType: string;
   sizeLabel?: string;
+  propertyType?: string;
   addons?: string[];
   estimatedPrice?: string;
   address?: string;
@@ -54,10 +55,9 @@ function wrapBrandedTemplate(title: string, bodyContent: string): string {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 20px 10px;">
     <tr>
       <td align="center">
-        <!-- Main Card Container -->
+
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0;">
 
-          <!-- Ultra-compact Slim Navy Banner (Only Company Name) -->
           <tr>
             <td style="background-color: #1b2a5a; padding: 10px 20px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 16px; font-weight: 700; letter-spacing: 0.2px; line-height: 1.2;">
@@ -66,14 +66,12 @@ function wrapBrandedTemplate(title: string, bodyContent: string): string {
             </td>
           </tr>
 
-          <!-- Clean White Email Body Content -->
           <tr>
             <td style="padding: 26px 26px 20px; background-color: #ffffff;">
               ${bodyContent}
             </td>
           </tr>
 
-          <!-- Contact Direct Callout -->
           <tr>
             <td style="padding: 14px 26px; background-color: #ffffff; border-top: 1px solid #f1f5f9; text-align: center;">
               <p style="margin: 0 0 4px; font-size: 13px; color: #64748b; font-weight: 500;">
@@ -86,7 +84,6 @@ function wrapBrandedTemplate(title: string, bodyContent: string): string {
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
             <td style="padding: 16px 26px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
               <p style="margin: 0 0 4px; color: #1e293b; font-size: 12px; font-weight: 700;">
@@ -196,7 +193,6 @@ export async function sendQuoteEmailNotification(
         </p>
       </div>
 
-      <!-- Estimated Price Highlight Box (Clean & Minimal) -->
       <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; text-align: center; margin-bottom: 20px;">
         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #0284c7;">
           Estimated Starting Price
@@ -209,7 +205,6 @@ export async function sendQuoteEmailNotification(
         </div>
       </div>
 
-      <!-- Details Table (Clean white design) -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 16px; border-collapse: collapse; font-size: 14px;">
         <tr>
           <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #64748b; width: 140px;">Customer:</td>
@@ -231,6 +226,11 @@ export async function sendQuoteEmailNotification(
           <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #64748b;">Service:</td>
           <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #1e2952;">${data.serviceType}</td>
         </tr>
+        ${data.propertyType ? `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #64748b;">Property Type:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a;">${data.propertyType}</td>
+        </tr>` : ''}
         ${data.sizeLabel ? `
         <tr>
           <td style="padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #64748b;">Home Size:</td>
@@ -314,7 +314,7 @@ export async function sendQuoteCustomerConfirmation(
     const cleanNotes = data.notes ? data.notes.replace(/\[|\]/g, '').trim() : '';
 
     const bodyContent = `
-      <!-- Greeting -->
+
       <div style="margin-bottom: 20px;">
         <h2 style="margin: 0 0 6px; color: #0f172a; font-size: 20px; font-weight: 800; letter-spacing: -0.3px;">
           Thank you, ${data.clientName}!
@@ -324,7 +324,6 @@ export async function sendQuoteCustomerConfirmation(
         </p>
       </div>
 
-      <!-- Estimated Price Callout Box (Clean White / Soft Border) -->
       <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; text-align: center; margin-bottom: 22px;">
         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #0284c7;">
           Estimated Starting Price
@@ -337,7 +336,6 @@ export async function sendQuoteCustomerConfirmation(
         </div>
       </div>
 
-      <!-- Summary of Request -->
       <div style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 22px;">
         <div style="background-color: #f8fafc; padding: 10px 16px; border-bottom: 1px solid #e2e8f0;">
           <h3 style="margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #334155;">
@@ -349,6 +347,11 @@ export async function sendQuoteCustomerConfirmation(
             <td style="padding: 7px 0; border-bottom: 1px solid #f1f5f9; color: #64748b; font-weight: 600; width: 140px;">Service:</td>
             <td style="padding: 7px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 700;">${data.serviceType}</td>
           </tr>
+          ${data.propertyType ? `
+          <tr>
+            <td style="padding: 7px 0; border-bottom: 1px solid #f1f5f9; color: #64748b; font-weight: 600;">Property Type:</td>
+            <td style="padding: 7px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 600;">${data.propertyType}</td>
+          </tr>` : ''}
           ${data.sizeLabel ? `
           <tr>
             <td style="padding: 7px 0; border-bottom: 1px solid #f1f5f9; color: #64748b; font-weight: 600;">Home Size:</td>
@@ -381,7 +384,6 @@ export async function sendQuoteCustomerConfirmation(
         </table>
       </div>
 
-      <!-- What Happens Next (3 Steps) -->
       <div style="background-color: #f8fafc; border-radius: 10px; padding: 16px 16px 12px; margin-bottom: 18px; border: 1px solid #e2e8f0;">
         <h3 style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #0f172a;">
           What happens next?
