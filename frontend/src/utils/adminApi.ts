@@ -24,6 +24,12 @@ export async function apiJson<T>(url: string, token: string, options: RequestIni
   return body.data as T;
 }
 
+export function propertyTypeLabel(tipo?: string | null): string | null {
+  if (tipo === 'DEPARTAMENTO') return 'Apartment';
+  if (tipo === 'CASA') return 'House';
+  return null;
+}
+
 export function serviceLabel(tipo: string): string {
   const map: Record<string, string> = {
     ESTANDAR: 'Standard Cleaning',
