@@ -14,6 +14,7 @@ import {
   type MetodoPago,
 } from '../../../utils/adminApi';
 import type { Venta } from './types';
+import { MopSpinner } from '../../common';
 
 export const Modal: React.FC<{
   onClose: () => void;
@@ -310,7 +311,7 @@ export const PaymentModal: React.FC<MutationProps> = ({ venta, token, onClose, o
 
         <div className="adm-modal-footer">
           <button type="submit" className="adm-modal-btn adm-modal-btn--accept" disabled={saving}>
-            {saving ? 'Saving…' : 'Mark as paid'}
+            {saving ? <><MopSpinner />Saving…</> : 'Mark as paid'}
           </button>
           <button type="button" className="adm-modal-btn adm-modal-btn--cancel" onClick={onClose}>
             Cancel
@@ -477,7 +478,7 @@ export const EditModal: React.FC<MutationProps> = ({ venta, token, onClose, onSa
 
         <div className="adm-modal-footer">
           <button type="submit" className="adm-modal-btn adm-modal-btn--accept" disabled={saving}>
-            {saving ? 'Saving…' : 'Save changes'}
+            {saving ? <><MopSpinner />Saving…</> : 'Save changes'}
           </button>
           <button type="button" className="adm-modal-btn adm-modal-btn--cancel" onClick={onClose}>
             Cancel
@@ -537,7 +538,7 @@ export const VoidModal: React.FC<MutationProps> = ({ venta, token, onClose, onSa
       <FormError msg={error} />
       <div className="adm-modal-footer">
         <button className="adm-modal-btn adm-modal-btn--reject" onClick={submit} disabled={saving}>
-          {saving ? 'Voiding…' : 'Confirm void'}
+          {saving ? <><MopSpinner />Voiding…</> : 'Confirm void'}
         </button>
         <button className="adm-modal-btn adm-modal-btn--cancel" onClick={onClose}>
           Back
@@ -789,7 +790,7 @@ export const NewSaleModal: React.FC<{
 
         <div className="adm-modal-footer">
           <button type="submit" className="adm-modal-btn adm-modal-btn--accept" disabled={saving}>
-            {saving ? 'Saving…' : 'Save sale'}
+            {saving ? <><MopSpinner />Saving…</> : 'Save sale'}
           </button>
           <button type="button" className="adm-modal-btn adm-modal-btn--cancel" onClick={onClose}>
             Cancel

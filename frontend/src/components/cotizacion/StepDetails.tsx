@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   Plus,
@@ -15,12 +14,27 @@ import {
   Dog,
   Clock,
   Info,
+  BedDouble,
+  Bath,
+  Building2,
+  Home as HomeIcon,
 } from 'lucide-react';
-import { PRICING, ADDONS, ServiceKey, SERVICE_KEY_TO_NAME } from '../../data/pricing';
+import {
+  PRICING,
+  ADDONS,
+  ServiceKey,
+  SERVICE_KEY_TO_NAME,
+  PROPERTY_TYPE_LABEL,
+  type PropertyType,
+  type SizeOption,
+} from '../../data/pricing';
 import { estimate } from '../../utils/estimate';
+import { PropertyVisualizer } from './PropertyVisualizer';
 
 interface StepDetailsProps {
   serviceKey: ServiceKey;
+  propertyType: PropertyType;
+  onChangePropertyType: (type: PropertyType) => void;
   selectedSizeId: string | null;
   onSelectSize: (sizeId: string) => void;
   selectedAddons: Record<string, number>;
@@ -37,93 +51,6 @@ const ADDON_ICONS: Record<string, React.ReactNode> = {
   interior_windows: <AppWindow size={24} />,
   light_organizing: <Layers size={24} />,
   pet_hair_removal: <Dog size={24} />,
-};
-
-const renderSizeIllustration = (id: string, isSelected: boolean) => {
-  const stroke = isSelected ? '#16234D' : '#64748B';
-  const accent = isSelected ? '#3FBFB5' : '#CBD5E1';
-  const fill = isSelected ? 'rgba(63, 191, 181, 0.16)' : 'rgba(241, 245, 249, 0.6)';
-
-  switch (id) {
-    case '1bed_1bath':
-    case 'small_apt':
-
-      return (
-        <svg width="48" height="40" viewBox="0 0 48 40" fill="none" className="size-illustration-svg">
-          <rect x="12" y="10" width="24" height="26" rx="3" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <path d="M12 16H36" stroke={stroke} strokeWidth="1.5" />
-          <rect x="16" y="20" width="6" height="6" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <rect x="26" y="20" width="6" height="6" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <path d="M21 36V30H27V36" stroke={stroke} strokeWidth="1.5" />
-        </svg>
-      );
-    case '2bed_1bath':
-    case '2bed_1_5bath':
-    case '1_2bed_apt':
-
-      return (
-        <svg width="48" height="40" viewBox="0 0 48 40" fill="none" className="size-illustration-svg">
-          <path d="M7 19L24 6L41 19" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M12 16V35C12 35.5 12.5 36 13 36H35C35.5 36 36 35.5 36 35V16" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <rect x="17" y="21" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <path d="M26 36V27H31V36" stroke={stroke} strokeWidth="1.5" />
-          <path d="M33 13V9H37V16" stroke={stroke} strokeWidth="1.5" />
-        </svg>
-      );
-    case '2bed_2bath':
-
-      return (
-        <svg width="48" height="40" viewBox="0 0 48 40" fill="none" className="size-illustration-svg">
-          <path d="M6 18L21 6L36 18" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M10 15V35C10 35.5 10.5 36 11 36H31C31.5 36 32 35.5 32 35V15" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <rect x="14" y="17" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <rect x="23" y="17" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <rect x="14" y="25" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <path d="M23 36V27H28V36" stroke={stroke} strokeWidth="1.5" />
-          <rect x="32" y="22" width="10" height="14" rx="2" fill={fill} stroke={stroke} strokeWidth="1.5" />
-        </svg>
-      );
-    case '3bed_2bath':
-    case 'medium_home':
-    case '3bed_home':
-
-      return (
-        <svg width="48" height="40" viewBox="0 0 48 40" fill="none" className="size-illustration-svg">
-          <path d="M5 20L19 9L33 20" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M9 17V35C9 35.5 9.5 36 10 36H28C28.5 36 29 35.5 29 35V17" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <path d="M29 21L43 21V36H29V21Z" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <rect x="14" y="20" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <path d="M19 36V28H24V36" stroke={stroke} strokeWidth="1.5" />
-          <rect x="33" y="26" width="6" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <path d="M28 8H31V14" stroke={stroke} strokeWidth="1.5" />
-        </svg>
-      );
-    case '4bed_2_3bath':
-    case 'large_home':
-    case 'larger_home':
-
-      return (
-        <svg width="48" height="40" viewBox="0 0 48 40" fill="none" className="size-illustration-svg">
-          <path d="M4 17L17 7L30 17" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M7 15V36H27V15" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <path d="M27 15L39 15L44 19V36H27V15Z" fill={fill} stroke={stroke} strokeWidth="1.8" />
-          <rect x="11" y="18" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <rect x="19" y="18" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <rect x="31" y="21" width="5" height="5" rx="1" fill={accent} stroke={stroke} strokeWidth="1.2" />
-          <path d="M15 36V28H21V36" stroke={stroke} strokeWidth="1.5" />
-          <path d="M32 36V29H38V36" stroke={stroke} strokeWidth="1.5" />
-          <path d="M24 6H27V12" stroke={stroke} strokeWidth="1.5" />
-        </svg>
-      );
-    case 'something_else':
-    default:
-
-      return (
-        <div className="size-illustration-icon">
-          <HelpCircle size={28} className="size-card-icon" />
-        </div>
-      );
-  }
 };
 
 const useAnimatedNumber = (target: number, duration = 300) => {
@@ -160,12 +87,13 @@ const useAnimatedNumber = (target: number, duration = 300) => {
 
 export const StepDetails: React.FC<StepDetailsProps> = ({
   serviceKey,
+  propertyType,
+  onChangePropertyType,
   selectedSizeId,
   onSelectSize,
   selectedAddons,
   onToggleAddon,
   onChangeAddonQty,
-  onBack,
   onContinue,
 }) => {
   const serviceConfig = PRICING[serviceKey];
@@ -179,6 +107,8 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
   const targetMax = estimateResult ? estimateResult.max : 0;
   const animatedMin = useAnimatedNumber(targetMin, 300);
   const animatedMax = useAnimatedNumber(targetMax, 300);
+
+  const isSinglePrice = Boolean(selectedSizeId) && !isCustomQuote && targetMin === targetMax;
 
   const buttonText = isCustomQuote ? 'Request a quote' : 'Continue to Contact Info';
   const canProceed = Boolean(selectedSizeId);
@@ -200,17 +130,248 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
     })
     .filter(Boolean);
 
+  const PROPERTY_TYPE_OPTIONS: { value: PropertyType; caption: string; icon: React.ReactNode }[] = [
+    { value: 'apartment', caption: 'Condo, flat or unit', icon: <Building2 size={26} /> },
+    { value: 'house', caption: 'Single-family or townhouse', icon: <HomeIcon size={26} /> },
+  ];
+  const [sizeNotice, setSizeNotice] = useState('');
+  const typeRefs = useRef(new Map<PropertyType, HTMLDivElement>());
+
+  const bedsOf = (o: SizeOption) => (o.beds ? parseInt(o.beds, 10) : 99);
+
+  const changePropertyType = (type: PropertyType) => {
+    if (type === propertyType) return;
+    onChangePropertyType(type);
+    setSizeNotice('');
+    if (!selectedSizeObj || selectedSizeObj.propertyTypes.includes(type)) return;
+
+    const candidates = serviceConfig.options.filter((o) => o.plan && o.propertyTypes.includes(type));
+    if (candidates.length === 0) return;
+    const target = bedsOf(selectedSizeObj);
+    const closest = candidates.reduce((best, o) =>
+      Math.abs(bedsOf(o) - target) < Math.abs(bedsOf(best) - target) ? o : best
+    );
+    onSelectSize(closest.id);
+    setSizeNotice(`We adjusted your size for ${type === 'apartment' ? 'an apartment' : 'a house'}.`);
+  };
+
+  const handleTypeKeyDown = (e: React.KeyboardEvent, type: PropertyType) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      changePropertyType(type);
+      return;
+    }
+    if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) return;
+    e.preventDefault();
+    const index = PROPERTY_TYPE_OPTIONS.findIndex((o) => o.value === type);
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+    const next = PROPERTY_TYPE_OPTIONS[(index + step + PROPERTY_TYPE_OPTIONS.length) % PROPERTY_TYPE_OPTIONS.length];
+    changePropertyType(next.value);
+    typeRefs.current.get(next.value)?.focus();
+  };
+
+  const typeOptions = serviceConfig.options.filter((o) => o.propertyTypes.includes(propertyType) || !o.plan);
+
+  const layoutOptions = typeOptions.filter((o) => o.plan);
+  const customOptions = typeOptions.filter((o) => !o.plan);
+  const allSizeOptions = [...layoutOptions, ...customOptions];
+  const tabStopId = allSizeOptions.some((o) => o.id === selectedSizeId) ? selectedSizeId : allSizeOptions[0]?.id;
+
+  const [previewSizeId, setPreviewSizeId] = useState<string | null>(null);
+  const cardRefs = useRef(new Map<string, HTMLDivElement>());
+
+  const handleCardKeyDown = (e: React.KeyboardEvent, option: SizeOption) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelectSize(option.id);
+      return;
+    }
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const index = allSizeOptions.findIndex((o) => o.id === option.id);
+    const next = allSizeOptions[(index + step + allSizeOptions.length) % allSizeOptions.length];
+    onSelectSize(next.id);
+    cardRefs.current.get(next.id)?.focus();
+  };
+
+  const sizeCardProps = (option: SizeOption) => {
+    const isSelected = selectedSizeId === option.id;
+    return {
+      ref: (el: HTMLDivElement | null) => {
+        if (el) cardRefs.current.set(option.id, el);
+        else cardRefs.current.delete(option.id);
+      },
+      role: 'radio',
+      'aria-checked': isSelected,
+      tabIndex: option.id === tabStopId ? 0 : -1,
+      onClick: () => {
+        setSizeNotice('');
+        onSelectSize(option.id);
+      },
+      onKeyDown: (e: React.KeyboardEvent) => handleCardKeyDown(e, option),
+      onPointerEnter: (e: React.PointerEvent) => {
+        if (e.pointerType === 'mouse') setPreviewSizeId(option.id);
+      },
+      onPointerLeave: () => setPreviewSizeId(null),
+      onFocus: () => setPreviewSizeId(option.id),
+      onBlur: () => setPreviewSizeId(null),
+    };
+  };
+
+  const radioMark = (isSelected: boolean) => (
+    <span className="size-radio-circle" aria-hidden="true">
+      {isSelected && <Check size={13} strokeWidth={3} />}
+    </span>
+  );
+
+  const renderSizeCard = (option: SizeOption) => {
+    const isSelected = selectedSizeId === option.id;
+    const priceText = option.basePrice === null ? 'Custom' : `$${option.basePrice}`;
+    const caption = option.label.replace(' / ', ' · ');
+
+    return (
+      <div
+        key={option.id}
+        {...sizeCardProps(option)}
+        aria-label={`${option.label}, ${option.basePrice === null ? 'custom quote' : `from ${priceText}`}${option.estimatedTime ? `, ${option.estimatedTime}` : ''}`}
+        className={`size-card-item ${isSelected ? 'selected' : ''} ${option.popular ? 'size-card-item--popular' : ''}`}
+      >
+        {option.popular && <span className="size-popular-badge">Most popular</span>}
+        {radioMark(isSelected)}
+
+        <div className="size-card-body">
+          {option.beds ? (
+            <div className="size-card-counts" aria-hidden="true">
+              <span className="size-card-count">
+                <BedDouble size={20} />
+                <strong>{option.beds}</strong>
+              </span>
+              {option.baths && (
+                <span className="size-card-count">
+                  <Bath size={20} />
+                  <strong>{option.baths}</strong>
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="size-card-hero-label">{option.shortLabel || option.label}</span>
+          )}
+          <span className="size-card-caption">
+            {option.beds ? caption : "We'll prepare a custom quote"}
+          </span>
+        </div>
+
+        <div className="size-card-footer">
+          <span className="size-card-price-block">
+            {option.basePrice !== null && <span className="size-card-from">From</span>}
+            <strong className={`size-card-price ${option.basePrice === null ? 'custom-price' : ''}`}>{priceText}</strong>
+          </span>
+          {option.estimatedTime && (
+            <span className="size-card-time">
+              <Clock size={13} />
+              {option.estimatedTime}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCustomRow = (option: SizeOption) => {
+    const isSelected = selectedSizeId === option.id;
+    return (
+      <div
+        key={option.id}
+        {...sizeCardProps(option)}
+        aria-label="Not sure? Custom layout. We'll prepare a custom quote for your home."
+        className={`size-card-item size-card-item--custom ${isSelected ? 'selected' : ''}`}
+      >
+        <span className="size-custom-icon" aria-hidden="true">
+          <HelpCircle size={22} />
+        </span>
+        <div className="size-card-body">
+          <span className="size-card-hero-label">Not sure? Custom layout</span>
+          <span className="size-card-caption">We'll prepare a custom quote for your home.</span>
+        </div>
+        <span className="size-custom-tag">Custom quote</span>
+        {radioMark(isSelected)}
+      </div>
+    );
+  };
+
+  const ADDON_GROUPS = [
+    { title: 'Kitchen', ids: ['inside_fridge', 'inside_oven', 'inside_cabinets'] },
+    { title: 'Around the home', ids: ['interior_windows', 'light_organizing', 'pet_hair_removal'] },
+  ];
+  const MAX_ADDON_QTY = 20;
+
+  const addonPrice = (addon: (typeof ADDONS)[number], qty: number) => {
+    const n = Math.max(qty, 1);
+    const lo = addon.min * n;
+    const hi = addon.max * n;
+    const range = lo === hi ? `+$${lo}` : `+$${lo}–$${hi}`;
+    if (qty > 0) return range;
+    return addon.unit === 'each' ? `${range} each` : addon.unit === 'hour' ? `${range}/hr` : range;
+  };
+
+  const renderAddonTile = (addon: (typeof ADDONS)[number]) => {
+    const qty = selectedAddons[addon.id] || 0;
+    const isActive = qty > 0;
+    const hasQty = addon.unit === 'each' || addon.unit === 'hour';
+    const unitWord = addon.unit === 'each' ? (qty === 1 ? 'window' : 'windows') : qty === 1 ? 'hour' : 'hours';
+
+    return (
+      <div key={addon.id} className={`addon-tile ${isActive ? 'active' : ''}`}>
+        <button
+          type="button"
+          className="addon-tile-toggle"
+          aria-pressed={isActive}
+          onClick={() => onToggleAddon(addon.id)}
+        >
+          <span className="addon-tile-check" aria-hidden="true">
+            {isActive && <Check size={12} strokeWidth={3} />}
+          </span>
+          <span className="addon-tile-icon" aria-hidden="true">
+            {ADDON_ICONS[addon.id] || <Sparkles size={22} />}
+          </span>
+          <span className="addon-tile-name">{addon.label}</span>
+          <span className="addon-tile-price">{addonPrice(addon, qty)}</span>
+        </button>
+
+        {isActive && hasQty && (
+          <div className="addon-tile-stepper" role="group" aria-label={`${addon.label} quantity`}>
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => onChangeAddonQty(addon.id, qty - 1)}
+              disabled={qty <= 1}
+              aria-label={`Fewer ${addon.unit === 'each' ? 'windows' : 'hours'}`}
+            >
+              <Minus size={13} strokeWidth={2.5} />
+            </button>
+            <span className="stepper-count" aria-live="polite">
+              {qty} <span className="stepper-unit">{unitWord}</span>
+            </span>
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => onChangeAddonQty(addon.id, Math.min(qty + 1, MAX_ADDON_QTY))}
+              disabled={qty >= MAX_ADDON_QTY}
+              aria-label={`More ${addon.unit === 'each' ? 'windows' : 'hours'}`}
+            >
+              <Plus size={13} strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="quote-step-details-container">
 
       <div className="quote-step-header">
-        <div className="step-back-row">
-          <button type="button" className="btn-back-step" onClick={onBack}>
-            <ArrowLeft size={16} />
-            <span>Change service</span>
-          </button>
-          <span className="current-service-badge">{serviceName}</span>
-        </div>
         <h2 className="step-title">Customize Your Cleaning</h2>
         <p className="step-subtitle">
           Select the size of your space and any extra areas that need care.
@@ -221,68 +382,50 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
 
         <div className="step-details-main-col">
 
+          <div className="quote-preview-slot">
+            <PropertyVisualizer
+              serviceKey={serviceKey}
+              propertyType={propertyType}
+              selectedSizeId={selectedSizeId}
+              selectedAddons={selectedAddons}
+              previewSizeId={previewSizeId}
+            />
+          </div>
+
           <div className="quote-section-block">
             <div className="section-title-wrap">
               <span className="section-step-num">1</span>
               <div>
-                <h3 className="section-title">How big is your home?</h3>
+                <h3 className="section-title" id="property-type-title">What type of property?</h3>
                 <p className="section-caption">
-                  Choose the layout that matches your property.
+                  This helps us plan the visit. It doesn't change the price.
                 </p>
               </div>
             </div>
 
-            <div className={`size-cards-grid ${serviceConfig.options.length > 3 ? 'size-cards-grid--7' : 'size-cards-grid--3'}`}>
-              {serviceConfig.options.map((option) => {
-                const isSelected = selectedSizeId === option.id;
-                const isSomethingElse = option.id === 'something_else' || option.id === 'larger_home';
-
+            <div className="size-options property-type-grid" role="radiogroup" aria-label="Property type">
+              {PROPERTY_TYPE_OPTIONS.map((opt) => {
+                const isSelected = propertyType === opt.value;
                 return (
                   <div
-                    key={option.id}
-                    role="button"
-                    tabIndex={0}
-                    className={`size-card-item size-option-row ${isSelected ? 'selected' : ''} ${isSomethingElse ? 'size-card-item--custom' : ''}`}
-                    onClick={() => onSelectSize(option.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSelectSize(option.id);
-                      }
+                    key={opt.value}
+                    ref={(el) => {
+                      if (el) typeRefs.current.set(opt.value, el);
+                      else typeRefs.current.delete(opt.value);
                     }}
+                    role="radio"
+                    aria-checked={isSelected}
+                    tabIndex={isSelected ? 0 : -1}
+                    className={`size-card-item property-type-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => changePropertyType(opt.value)}
+                    onKeyDown={(e) => handleTypeKeyDown(e, opt.value)}
                   >
-                    <div className="size-card-top">
-                      <div className="size-card-illustration-wrap">
-                        {renderSizeIllustration(option.id, isSelected)}
-                      </div>
-                      <div className={`size-radio-circle ${isSelected ? 'active' : ''}`}>
-                        {isSelected && <Check size={13} strokeWidth={3} />}
-                      </div>
-                    </div>
-
-                    <div className="size-card-body">
-
-                      <span className="size-card-hero-label">
-                        {option.shortLabel || option.label}
-                      </span>
-                      {isSomethingElse && (
-                        <span className="size-card-note">We'll prepare a custom quote</span>
-                      )}
-                    </div>
-
-                    <div className="size-card-footer">
-                      <div className="size-card-price-row">
-                        <span className={`size-card-price ${option.basePrice === null ? 'custom-price' : ''}`}>
-                          {option.basePrice === null ? 'Custom' : `from $${option.basePrice}`}
-                        </span>
-                        {option.estimatedTime && (
-                          <span className="size-card-time">
-                            <Clock size={12} />
-                            {option.estimatedTime}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    <span className="property-type-icon" aria-hidden="true">{opt.icon}</span>
+                    <span className="property-type-text">
+                      <span className="property-type-title">{PROPERTY_TYPE_LABEL[opt.value]}</span>
+                      <span className="property-type-caption">{opt.caption}</span>
+                    </span>
+                    {radioMark(isSelected)}
                   </div>
                 );
               })}
@@ -293,6 +436,27 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
             <div className="section-title-wrap">
               <span className="section-step-num">2</span>
               <div>
+                <h3 className="section-title" id="size-section-title">How big is your home?</h3>
+                <p className="section-caption">
+                  Choose the layout that matches your property.
+                </p>
+              </div>
+            </div>
+
+            <p className="size-adjust-notice" aria-live="polite">
+              {sizeNotice}
+            </p>
+
+            <div className="size-options" role="radiogroup" aria-labelledby="size-section-title">
+              <div className="size-cards-grid">{layoutOptions.map(renderSizeCard)}</div>
+              {customOptions.map(renderCustomRow)}
+            </div>
+          </div>
+
+          <div className="quote-section-block">
+            <div className="section-title-wrap">
+              <span className="section-step-num">3</span>
+              <div>
                 <h3 className="section-title">Add-On Services</h3>
                 <p className="section-caption">
                   Add extra care for specific appliances and areas.
@@ -300,94 +464,18 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
               </div>
             </div>
 
-            <div className="addons-compact-grid">
-              {ADDONS.map((addon) => {
-                const currentQty = selectedAddons[addon.id] || 0;
-                const isActive = currentQty > 0;
-
-                let priceText = '';
-                if (addon.unit === 'flat') {
-                  priceText = addon.min === addon.max ? `+$${addon.min}` : `+$${addon.min}–$${addon.max}`;
-                } else if (addon.unit === 'each') {
-                  priceText = `+$${addon.min}–$${addon.max} each`;
-                } else if (addon.unit === 'hour') {
-                  priceText = `+$${addon.min}/hr`;
-                }
-
-                return (
-                  <div
-                    key={addon.id}
-                    className={`addon-compact-card addon-card ${isActive ? 'active' : ''}`}
-                    onClick={() => {
-                      if (addon.unit === 'flat' || !isActive) {
-                        onToggleAddon(addon.id);
-                      }
-                    }}
-                  >
-
-                    <div className="addon-compact-icon">
-                      {ADDON_ICONS[addon.id] || <Sparkles size={22} />}
-                    </div>
-
-                    <div className="addon-compact-details">
-                      <span className="addon-compact-title">{addon.label}</span>
-                      <span className="addon-compact-price">{priceText}</span>
-                    </div>
-
-                    <div className="addon-compact-action" onClick={(e) => e.stopPropagation()}>
-                      {isActive && (addon.unit === 'each' || addon.unit === 'hour') ? (
-                        <div className="addon-compact-stepper" role="group" aria-label={`Adjust ${addon.label} quantity`}>
-                          <button
-                            type="button"
-                            className="stepper-btn"
-                            onClick={() => {
-                              if (currentQty > 1) {
-                                onChangeAddonQty(addon.id, currentQty - 1);
-                              } else {
-                                onToggleAddon(addon.id);
-                              }
-                            }}
-                            aria-label="Decrease quantity"
-                          >
-                            <Minus size={13} strokeWidth={2.5} />
-                          </button>
-                          <span className="stepper-count">
-                            {currentQty}{addon.unit === 'hour' ? 'h' : ''}
-                          </span>
-                          <button
-                            type="button"
-                            className="stepper-btn"
-                            onClick={() => onChangeAddonQty(addon.id, currentQty + 1)}
-                            aria-label="Increase quantity"
-                          >
-                            <Plus size={13} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className={`addon-toggle-btn ${isActive ? 'active' : ''}`}
-                          onClick={() => onToggleAddon(addon.id)}
-                          aria-pressed={isActive}
-                          aria-label={`${isActive ? 'Remove' : 'Add'} ${addon.label}`}
-                        >
-                          {isActive ? (
-                            <>
-                              <Check size={13} strokeWidth={3} />
-                              <span>Added</span>
-                            </>
-                          ) : (
-                            <>
-                              <Plus size={13} strokeWidth={2.5} />
-                              <span>Add</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
+            <div className="addon-groups">
+              {ADDON_GROUPS.map((group) => (
+                <div key={group.title} className="addon-group">
+                  <h4 className="addon-group-title">{group.title}</h4>
+                  <div className="addon-tiles-grid">
+                    {group.ids
+                      .map((id) => ADDONS.find((a) => a.id === id))
+                      .filter((a): a is (typeof ADDONS)[number] => Boolean(a))
+                      .map(renderAddonTile)}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
             <div className="quote-note-banner">
@@ -419,6 +507,11 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
               </div>
 
               <div className="live-summary-row">
+                <span className="live-row-label">Property</span>
+                <strong className="live-row-val">{PROPERTY_TYPE_LABEL[propertyType]}</strong>
+              </div>
+
+              <div className="live-summary-row">
                 <span className="live-row-label">Layout / Size</span>
                 <strong className="live-row-val">
                   {selectedSizeObj ? (selectedSizeObj.shortLabel || selectedSizeObj.label) : <em className="live-placeholder-text">Select a size</em>}
@@ -446,21 +539,14 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
                   </div>
                   <ul className="live-addons-animated-list">
                     {activeAddonsList.map((item) => {
-                      const qtySuffix =
-                        item!.unit === 'each'
-                          ? ` (${item!.qty} ${item!.qty === 1 ? 'window' : 'windows'})`
-                          : item!.unit === 'hour'
-                          ? ` (${item!.qty} ${item!.qty === 1 ? 'hr' : 'hrs'})`
-                          : item!.qty > 1
-                          ? ` (x${item!.qty})`
-                          : '';
+                      const qtySuffix = item!.unit !== 'flat' || item!.qty > 1 ? ` ×${item!.qty}` : '';
 
                       return (
                         <li key={item!.id} className="live-addon-pill-item">
                           <span className="live-addon-pill-label">
-                            + {item!.label}{qtySuffix}
+                            {item!.label}{qtySuffix}
                           </span>
-                          <strong className="live-addon-pill-price">{item!.costText}</strong>
+                          <strong className="live-addon-pill-price">+{item!.costText}</strong>
                         </li>
                       );
                     })}
@@ -470,7 +556,7 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
             </div>
 
             <div className="live-summary-total-box">
-              <span className="live-total-caption">Estimated Range</span>
+              <span className="live-total-caption">{isSinglePrice ? 'Starting at' : 'Estimated Range'}</span>
               <div className="live-animated-price-display">
                 {!selectedSizeId ? (
                   <span className="price-prompt">Select size above</span>
@@ -484,7 +570,7 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
               </div>
               <span className="live-total-disclaimer">
                 {selectedSizeId
-                  ? 'Guaranteed pricing confirmed before your appointment.'
+                  ? 'Final price confirmed before your appointment.'
                   : 'Instant preview calculated as you customize.'}
               </span>
             </div>
@@ -504,7 +590,7 @@ export const StepDetails: React.FC<StepDetailsProps> = ({
 
       <div className="quote-live-bar-mobile">
         <div className="mobile-bar-price-info">
-          <span className="mobile-bar-label">Estimated Total</span>
+          <span className="mobile-bar-label">{isSinglePrice ? 'Starting at' : 'Estimated Total'}</span>
           <span className="mobile-bar-amount">
             {!selectedSizeId ? (
               'Select size'

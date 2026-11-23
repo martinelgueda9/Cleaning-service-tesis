@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '../../styles/services.css';
 
@@ -6,8 +6,6 @@ export interface ServiceDetail {
   id: string;
   title: string;
   shortLabel: string;
-  badge: string;
-  startingPrice: string;
   tagline: string;
   description: string;
   items: string[];
@@ -19,8 +17,6 @@ export const SERVICES_DATA: ServiceDetail[] = [
     id: 'regular_cleaning',
     title: 'Standard Cleaning',
     shortLabel: 'Standard',
-    badge: 'Routine Maintenance',
-    startingPrice: '$135+',
     tagline: 'Routine maintenance for homes in normal condition',
     description: 'Regular upkeep for living spaces, kitchens, bathrooms, and bedrooms to maintain cleanliness and hygiene.',
     items: [
@@ -35,8 +31,6 @@ export const SERVICES_DATA: ServiceDetail[] = [
     id: 'deep_cleaning',
     title: 'Deep Cleaning',
     shortLabel: 'Deep Clean',
-    badge: 'First Visit & Seasonal',
-    startingPrice: '$250+',
     tagline: 'More time, more detail, and a deeper clean',
     description: 'Comprehensive restorative cleaning tackling accumulated dust, baseboards, corners, and hard-to-reach spaces.',
     items: [
@@ -52,8 +46,6 @@ export const SERVICES_DATA: ServiceDetail[] = [
     id: 'move_in_cleaning',
     title: 'Move-In or Move-Out',
     shortLabel: 'Move-In / Move-Out',
-    badge: 'Turnover & Deposit Ready',
-    startingPrice: '$275+',
     tagline: 'For empty or nearly empty properties before or after moving',
     description: 'Top-to-bottom turnover clean designed to leave empty properties pristine for landlords, buyers, or inspections.',
     items: [
@@ -68,8 +60,6 @@ export const SERVICES_DATA: ServiceDetail[] = [
     id: 'addons',
     title: 'Add-On Services',
     shortLabel: 'Add-Ons',
-    badge: 'Custom Additions',
-    startingPrice: 'Varies',
     tagline: 'Combine with any service for targeted deep care',
     description: 'Customize your cleaning with specific targeted tasks for appliance interiors, windows, or organization.',
     items: [
@@ -83,8 +73,6 @@ export const SERVICES_DATA: ServiceDetail[] = [
     id: 'commercial_cleaning',
     title: 'Commercial Cleaning',
     shortLabel: 'Commercial',
-    badge: 'Offices & Facilities',
-    startingPrice: 'Custom Quote',
     tagline: 'Offices & Professional Workspaces',
     description: 'Direct corporate consultation and customized walkthrough for offices, business facilities, and commercial workspaces.',
     items: [
@@ -125,6 +113,88 @@ export const ServicesSection: React.FC = () => {
     scrollToCard(newIndex);
   };
 
+  const DRAG_THRESHOLD = 6;
+  const drag = useRef({ pressed: false, moved: false, startX: 0, startScroll: 0, pointerId: -1 });
+  const suppressClick = useRef(false);
+  const snapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => () => {
+    if (snapTimer.current) clearTimeout(snapTimer.current);
+  }, []);
+
+  const cardStep = (container: HTMLDivElement) => {
+    const first = container.children[0] as HTMLElement | undefined;
+    const second = container.children[1] as HTMLElement | undefined;
+    if (!first) return 344;
+    return second ? second.offsetLeft - first.offsetLeft : first.offsetWidth + 24;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || !scrollContainerRef.current) return;
+    if (snapTimer.current) clearTimeout(snapTimer.current);
+    drag.current = {
+      pressed: true,
+      moved: false,
+      startX: e.clientX,
+      startScroll: scrollContainerRef.current.scrollLeft,
+      pointerId: e.pointerId,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    const container = scrollContainerRef.current;
+    if (!d.pressed || e.pointerId !== d.pointerId || !container) return;
+
+    const dx = e.clientX - d.startX;
+    if (!d.moved) {
+      if (Math.abs(dx) < DRAG_THRESHOLD) return;
+      d.moved = true;
+      setIsDragging(true);
+      container.setPointerCapture(e.pointerId);
+      window.getSelection()?.removeAllRanges();
+    }
+    e.preventDefault();
+    container.scrollLeft = d.startScroll - dx;
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    const container = scrollContainerRef.current;
+    if (!d.pressed || e.pointerId !== d.pointerId) return;
+    d.pressed = false;
+    if (!d.moved || !container) return;
+
+    if (container.hasPointerCapture(e.pointerId)) container.releasePointerCapture(e.pointerId);
+
+    suppressClick.current = true;
+    setTimeout(() => (suppressClick.current = false), 0);
+    if (container.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+
+    const step = cardStep(container);
+    const startIndex = Math.round(d.startScroll / step);
+    const dx = e.clientX - d.startX;
+    let target = Math.round(container.scrollLeft / step);
+    if (target === startIndex && Math.abs(dx) > step * 0.15) target += dx < 0 ? 1 : -1;
+    target = Math.max(0, Math.min(SERVICES_DATA.length - 1, target));
+
+    const first = container.children[0] as HTMLElement;
+    const targetEl = container.children[target] as HTMLElement;
+    container.scrollTo({ left: targetEl.offsetLeft - first.offsetLeft, behavior: 'smooth' });
+    setActiveIndex(target);
+
+    snapTimer.current = setTimeout(() => setIsDragging(false), 450);
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (suppressClick.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      suppressClick.current = false;
+    }
+  };
+
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
@@ -161,8 +231,14 @@ export const ServicesSection: React.FC = () => {
 
           <div
             ref={scrollContainerRef}
-            className="services-cards-carousel"
+            className={`services-cards-carousel ${isDragging ? 'is-dragging' : ''}`}
             onScroll={handleScroll}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onClickCapture={handleClickCapture}
+            onDragStart={(e) => e.preventDefault()}
           >
             {SERVICES_DATA.map((service, index) => {
               const isExpanded = expandedId === service.id;
@@ -176,10 +252,6 @@ export const ServicesSection: React.FC = () => {
                   <div className="svc-card-img-placeholder" />
 
                   <div className="svc-card-body">
-                    <div className="svc-card-icon-row">
-                      <span className="svc-card-badge">{service.badge}</span>
-                      <span className="svc-card-price">{service.startingPrice}</span>
-                    </div>
                     <h3 className="svc-card-title">{service.title}</h3>
                     <p className="svc-card-tagline">{service.tagline}</p>
                     <p className="svc-card-desc">{service.description}</p>
@@ -199,7 +271,7 @@ export const ServicesSection: React.FC = () => {
                   </div>
 
                   <div className="svc-card-overlay-panel" aria-hidden={!isExpanded}>
-                    <div className="svc-card-overlay-header">
+                    <div className="svc-card-overlay-header" style={{ '--i': 0 } as React.CSSProperties}>
                       <h4 className="svc-overlay-title">What's included</h4>
                       <button
                         type="button"
@@ -216,7 +288,7 @@ export const ServicesSection: React.FC = () => {
 
                     <ul className="svc-overlay-list">
                       {service.items.map((item, i) => (
-                        <li key={i}>
+                        <li key={i} style={{ '--i': i + 1 } as React.CSSProperties}>
                           <span className="svc-check">–</span>
                           <span>{item}</span>
                         </li>
@@ -224,7 +296,10 @@ export const ServicesSection: React.FC = () => {
                     </ul>
 
                     {service.notIncluded && (
-                      <p className="svc-not-included">
+                      <p
+                        className="svc-not-included"
+                        style={{ '--i': service.items.length + 1 } as React.CSSProperties}
+                      >
                         <strong>Not included:</strong> {service.notIncluded}
                       </p>
                     )}

@@ -15,6 +15,7 @@ import {
   type EstadoPago,
 } from '../../../utils/adminApi';
 import { ClienteHistorialModal } from '../clientes/ClienteHistorialModal';
+import { useMinDuration } from '../../../utils/useMinDuration';
 import { RevenueChart } from './RevenueChart';
 import type { PuntoIngreso, ResumenVentas, Venta } from './types';
 import {
@@ -25,7 +26,10 @@ import {
   VentaDetailModal,
   VoidModal,
 } from './VentaModals';
+import { ChartSkeleton, MopSpinner, Skeleton, TableSkeleton } from '../../common';
 import '../../../styles/ventas.css';
+
+const VENTAS_HEADERS = ['Code', 'Client', 'Service', 'Quoted', 'Final', 'Status', 'Payment', 'Source', 'Actions'];
 
 type ModalState =
   | { type: 'view' | 'pay' | 'edit' | 'void'; venta: Venta }
@@ -51,10 +55,13 @@ export const VentasPanel: React.FC<{ token: string }> = ({ token }) => {
   const q = useDebounced(search.trim());
 
   const [ventas, setVentas] = useState<Venta[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRaw, setLoading] = useState(true);
+  const loading = useMinDuration(loadingRaw);
   const [listError, setListError] = useState<string | null>(null);
   const [resumen, setResumen] = useState<ResumenVentas | null>(null);
   const [serie, setSerie] = useState<PuntoIngreso[]>([]);
+  const [resumenLoadingRaw, setResumenLoading] = useState(true);
+  const resumenLoading = useMinDuration(resumenLoadingRaw);
   const [modal, setModal] = useState<ModalState>(null);
   const [clienteAbierto, setClienteAbierto] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -94,6 +101,7 @@ export const VentasPanel: React.FC<{ token: string }> = ({ token }) => {
 
   useEffect(() => {
     let cancelled = false;
+    setResumenLoading(true);
     Promise.all([
       apiJson<ResumenVentas>(`/ventas/resumen?mes=${mes}`, token),
       apiJson<PuntoIngreso[]>(`/ventas/ingresos-mensuales?meses=12&hasta=${mes}`, token),
@@ -109,7 +117,8 @@ export const VentasPanel: React.FC<{ token: string }> = ({ token }) => {
           setResumen(null);
           setSerie([]);
         }
-      });
+      })
+      .finally(() => !cancelled && setResumenLoading(false));
     return () => {
       cancelled = true;
     };
@@ -157,7 +166,12 @@ export const VentasPanel: React.FC<{ token: string }> = ({ token }) => {
   const isCurrentMonth = mes === currentMonthKey();
   const periodo = todosLosMeses ? 'all months' : monthLabel(mes);
 
-  const renderAcciones = (v: Venta, full = false) => (
+  const kpi = (value: React.ReactNode) =>
+    resumenLoading ? <Skeleton className="skel--kpi" /> : resumen ? value : '—';
+  const kpiMeta = (value: React.ReactNode) =>
+    resumenLoading ? <Skeleton className="skel--kpi-meta" /> : resumen ? value : ' ';
+
+  const renderAcciones =(v: Venta, full = false) => (
     <>
       <button
         className={`adm-action-btn adm-action-btn--view ${full ? 'full-btn' : ''}`}
@@ -212,33 +226,39 @@ export const VentasPanel: React.FC<{ token: string }> = ({ token }) => {
       <div className="vta-kpis">
         <div className="vta-kpi">
           <span className="vta-kpi-label">Revenue · {monthLabel(mes, 'short')}</span>
-          <strong className="vta-kpi-value">{resumen ? formatMoney(resumen.ingresosMes) : '—'}</strong>
+          <strong className="vta-kpi-value">{kpi(resumen && formatMoney(resumen.ingresosMes))}</strong>
           <span className="vta-kpi-meta">
-            {resumen ? `${resumen.ventasPagadas} paid sale${resumen.ventasPagadas === 1 ? '' : 's'}` : ' '}
+            {kpiMeta(resumen && `${resumen.ventasPagadas} paid sale${resumen.ventasPagadas === 1 ? '' : 's'}`)}
           </span>
         </div>
         <div className="vta-kpi">
           <span className="vta-kpi-label">Outstanding</span>
-          <strong className={`vta-kpi-value ${resumen && resumen.porCobrar > 0 ? 'vta-kpi-value--warn' : ''}`}>
-            {resumen ? formatMoney(resumen.porCobrar) : '—'}
+          <strong
+            className={`vta-kpi-value ${!resumenLoading && resumen && resumen.porCobrar > 0 ? 'vta-kpi-value--warn' : ''}`}
+          >
+            {kpi(resumen && formatMoney(resumen.porCobrar))}
           </strong>
           <span className="vta-kpi-meta">
-            {resumen ? `${resumen.ventasPendientes} pending · all months` : ' '}
+            {kpiMeta(resumen && `${resumen.ventasPendientes} pending · all months`)}
           </span>
         </div>
         <div className="vta-kpi">
           <span className="vta-kpi-label">Services done · {monthLabel(mes, 'short')}</span>
-          <strong className="vta-kpi-value">{resumen ? resumen.serviciosRealizados : '—'}</strong>
+          <strong className="vta-kpi-value">{kpi(resumen?.serviciosRealizados)}</strong>
           <span className="vta-kpi-meta">Voided sales excluded</span>
         </div>
         <div className="vta-kpi">
           <span className="vta-kpi-label">Average ticket · {monthLabel(mes, 'short')}</span>
-          <strong className="vta-kpi-value">{resumen ? formatMoney(resumen.ticketPromedio) : '—'}</strong>
+          <strong className="vta-kpi-value">{kpi(resumen && formatMoney(resumen.ticketPromedio))}</strong>
           <span className="vta-kpi-meta">Revenue ÷ paid sales</span>
         </div>
       </div>
 
-      {serie.length > 0 && <RevenueChart serie={serie} selected={mes} onSelect={goToMonth} />}
+      {resumenLoading ? (
+        <ChartSkeleton />
+      ) : (
+        serie.length > 0 && <RevenueChart serie={serie} selected={mes} onSelect={goToMonth} />
+      )}
 
       <div className="adm-filters-toolbar">
         <div className="adm-filters-group">
@@ -284,14 +304,14 @@ export const VentasPanel: React.FC<{ token: string }> = ({ token }) => {
             )}
           </div>
           <button className="vta-export-btn" onClick={handleExport} disabled={exporting}>
-            <Download size={14} />
+            {exporting ? <MopSpinner size={15} className="mop-spinner--flex" /> : <Download size={14} />}
             <span>{exporting ? 'Exporting…' : 'Export to Excel'}</span>
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="adm-loading">Loading sales…</div>
+        <TableSkeleton headers={VENTAS_HEADERS} label="Loading sales…" />
       ) : listError ? (
         <div className="adm-empty">Couldn't load sales: {listError}</div>
       ) : ventas.length === 0 ? (

@@ -389,6 +389,9 @@ textarea {
   background: linear-gradient(180deg, #f0f4f9 0%, #f8fafc 100%);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   padding: 4.5rem 2.5rem;
+  min-height: calc(100vh - 98px);
+  display: flex;
+  align-items: center;
   box-shadow: none;
   border-radius: 0;
   border-top: none;
@@ -397,6 +400,7 @@ textarea {
 }
 
 .hero-container {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   display: flex;
@@ -512,6 +516,7 @@ textarea {
 @media (max-width: 900px) {
   .main-hero {
     padding: 3rem 1.5rem;
+    min-height: 0;
   }
 
   .hero-container {

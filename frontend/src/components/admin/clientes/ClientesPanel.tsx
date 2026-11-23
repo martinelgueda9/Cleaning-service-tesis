@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowUpDown, Phone, Search } from 'lucide-react';
 import { apiJson, clienteNombre, formatDateUTC, formatMoney } from '../../../utils/adminApi';
 import { ClienteHistorialModal } from './ClienteHistorialModal';
+import { useMinDuration } from '../../../utils/useMinDuration';
+import { TableSkeleton } from '../../common';
 import '../../../styles/ventas.css';
 
 interface ClienteCrm {
@@ -23,7 +25,8 @@ type SortKey = 'gastado' | 'ultimo' | 'servicios' | 'nombre';
 
 export const ClientesPanel: React.FC<{ token: string }> = ({ token }) => {
   const [clientes, setClientes] = useState<ClienteCrm[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRaw, setLoading] = useState(true);
+  const loading = useMinDuration(loadingRaw);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('gastado');
@@ -91,7 +94,10 @@ export const ClientesPanel: React.FC<{ token: string }> = ({ token }) => {
       </div>
 
       {loading ? (
-        <div className="adm-loading">Loading clients…</div>
+        <TableSkeleton
+          headers={['Client', 'Contact', 'Total spent', 'Outstanding', 'Services', 'Last service', 'Activity', 'Actions']}
+          label="Loading clients…"
+        />
       ) : error ? (
         <div className="adm-empty">Couldn't load clients: {error}</div>
       ) : lista.length === 0 ? (

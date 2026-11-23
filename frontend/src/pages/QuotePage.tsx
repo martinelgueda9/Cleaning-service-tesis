@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -23,7 +23,11 @@ import {
   type PropertyType,
 } from '../data/pricing';
 import { estimate, formatEstimatePrice } from '../utils/estimate';
+import { MopLoader } from '../components/common';
+import { useMinDuration } from '../utils/useMinDuration';
 import logoMNavy from '../assets/logo_m_navy.jpg';
+
+const STEP_LOADER_MS = 900;
 
 const formatFullDate = (dateStr?: string) => {
   if (!dateStr) return '';
@@ -70,21 +74,21 @@ const CLEANING_SERVICES: CleaningService[] = [
   {
     id: 'regular_cleaning',
     label: 'Standard Cleaning',
-    startingPrice: 'From $135+',
+    startingPrice: 'From $135',
     description: 'Upkeep of living spaces, kitchens, bathrooms, dusting, vacuuming, and floor mopping.',
     icon: <Sparkles size={24} />,
   },
   {
     id: 'deep_cleaning',
     label: 'Deep Cleaning',
-    startingPrice: 'From $250+',
+    startingPrice: 'From $250',
     description: 'First visit or seasonal clean: baseboards, detailed corners, fans, blinds, and scrubbed grout.',
     icon: <Droplets size={24} />,
   },
   {
     id: 'move_in_cleaning',
     label: 'Move-In or Move-Out',
-    startingPrice: 'From $275+',
+    startingPrice: 'From $275',
     description: 'Top-to-bottom turnover clean: inside empty cabinets, closets, and fully sanitized property.',
     icon: <Truck size={24} />,
   },
@@ -112,6 +116,21 @@ export const QuotePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isSubmittingRef = useRef<boolean>(false);
+  const [isChangingStep, setIsChangingStep] = useState(false);
+  const stepTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showSubmitLoader = useMinDuration(isSubmitting);
+
+  useEffect(() => () => {
+    if (stepTimer.current) clearTimeout(stepTimer.current);
+  }, []);
+
+  const goToStep = (target: number) => {
+    if (isChangingStep || target === step) return;
+    setIsChangingStep(true);
+    setStep(target);
+    window.scrollTo({ top: 0 });
+    stepTimer.current = setTimeout(() => setIsChangingStep(false), STEP_LOADER_MS);
+  };
 
   const handleSelectService = (id: string) => {
     if (selectedService !== id) {
@@ -152,7 +171,7 @@ export const QuotePage: React.FC = () => {
       return;
     }
 
-    setStep(2);
+    goToStep(2);
   };
 
   const handleToggleAddon = (addonId: string) => {
@@ -274,6 +293,8 @@ export const QuotePage: React.FC = () => {
 
   return (
     <div className="quote-page-wrapper">
+      {isChangingStep && <MopLoader label="Preparing your quote" />}
+      {showSubmitLoader && <MopLoader label="Sending your request" />}
 
       {!submitted && (
         <div className="quote-nav-bar">
@@ -283,9 +304,9 @@ export const QuotePage: React.FC = () => {
               if (step === 1) {
                 navigate('/');
               } else if (step === 2) {
-                setStep(1);
+                goToStep(1);
               } else if (step === 3) {
-                setStep(2);
+                goToStep(2);
               }
             }}
           >
@@ -302,7 +323,7 @@ export const QuotePage: React.FC = () => {
             currentStep={step}
             onStepClick={(targetStep) => {
               if (targetStep < step) {
-                setStep(targetStep);
+                goToStep(targetStep);
               }
             }}
           />
@@ -500,8 +521,8 @@ export const QuotePage: React.FC = () => {
             selectedAddons={selectedAddons}
             onToggleAddon={handleToggleAddon}
             onChangeAddonQty={handleChangeAddonQty}
-            onBack={() => setStep(1)}
-            onContinue={() => setStep(3)}
+            onBack={() => goToStep(1)}
+            onContinue={() => goToStep(3)}
           />
         ) : step === 3 && serviceKey ? (
 
@@ -512,8 +533,8 @@ export const QuotePage: React.FC = () => {
             initialData={contactInfo}
             isSubmitting={isSubmitting}
             submitError={submitError}
-            onEditService={() => setStep(1)}
-            onEditDetails={() => setStep(2)}
+            onEditService={() => goToStep(1)}
+            onEditDetails={() => goToStep(2)}
             onSubmit={handleContactSubmit}
           />
         ) : null}
