@@ -23,3 +23,8 @@ declare module '*.webp' {
   const src: string;
   export default src;
 }
+
+declare module '*.css' {
+  const src: void;
+  export default src;
+}
