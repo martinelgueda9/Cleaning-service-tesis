@@ -72,6 +72,7 @@ export const cotizacionPublicSchema = z.object({
       message: 'Tipo de servicio inválido',
     }),
   sizeId: z.string().optional(),
+  propertyType: z.enum(['apartment', 'house']).optional(),
   addons: z.union([
     z.record(z.number().int().min(0)),
     z.array(z.string()),
