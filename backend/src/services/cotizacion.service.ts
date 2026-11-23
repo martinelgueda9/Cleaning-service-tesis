@@ -243,6 +243,7 @@ export async function createPublic(data: {
   serviceType: string;
   sizeId?: string;
   sizeLabel?: string;
+  propertyType?: string;
   addons?: Record<string, number> | string[];
   addonLabels?: string[];
   nombre?: string;
@@ -260,6 +261,8 @@ export async function createPublic(data: {
   estimatedPrice?: string;
 }) {
   const tipoLimpieza = SERVICE_MAP[data.serviceType] || 'ESTANDAR';
+  const tipoPropiedad =
+    data.propertyType === 'apartment' ? 'DEPARTAMENTO' : data.propertyType === 'house' ? 'CASA' : null;
 
   const addonsMap =
     data.addons && typeof data.addons === 'object' && !Array.isArray(data.addons)
@@ -364,6 +367,7 @@ export async function createPublic(data: {
       codigo: generateCodigo(),
       clienteId: cliente.id,
       tipoLimpieza,
+      tipoPropiedad,
       numHabitaciones,
       numBanos,
       serviciosExtra: serviciosExtraFormatted,
@@ -444,7 +448,6 @@ export async function revisar(
     }
   }
 
-  // Cotización y cita se guardan juntas: si algo falla, no queda ninguna a medias.
   return prisma.$transaction(async (tx) => {
     const updatedCotizacion = await tx.cotizacion.update({
       where: { id },
