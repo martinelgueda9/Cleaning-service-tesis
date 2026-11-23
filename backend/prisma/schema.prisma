@@ -21,6 +21,11 @@ enum TipoLimpieza {
   OFICINA
 }
 
+enum TipoPropiedad {
+  DEPARTAMENTO
+  CASA
+}
+
 enum EstadoCotizacion {
   PENDIENTE
   ACEPTADA
@@ -147,6 +152,7 @@ model Cotizacion {
   cliente               Cliente           @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   tipoLimpieza          TipoLimpieza      @default(ESTANDAR)
+  tipoPropiedad         TipoPropiedad?
   piesCuadrados         Float?
   metrosCuadrados       Float?
   numHabitaciones       Int               @default(1)
